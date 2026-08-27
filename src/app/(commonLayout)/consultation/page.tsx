@@ -1,9 +1,18 @@
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import { getDoctores } from "./_actions";
+import DoctorList from "@/src/components/modules/consultation/doctorList";
 
-const ConsultationPage =()=>{
+const ConsultationPage = async()=>{
+    const queryClient =new QueryClient();
+
+    await queryClient.prefetchQuery({
+        queryKey:['doctors'],
+        queryFn: getDoctores
+    })
     return (
-        <div>
-            <h1>Consultation Page</h1>
-        </div>
+       <HydrationBoundary state={dehydrate(queryClient)}>
+         <DoctorList/>
+       </HydrationBoundary>
     );
 }
 
