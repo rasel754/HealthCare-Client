@@ -1,10 +1,9 @@
+import ForgetPasswordForm from "@/src/components/modules/auth/ForgetPasswordForm";
 
-const ForgetPasswordPage =()=>{
-    return (
-        <div>
-            <h1>Forget Password Page</h1>
-        </div>
-    );
+export default function ForgetPasswordPage() {
+  return (
+    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
+      <ForgetPasswordForm />
+    </div>
+  );
 }
-
-export default ForgetPasswordPage;

@@ -1,12 +1,5 @@
-export default function CommonLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-   <>
-   Common Layout
-   {children}
-   </>
-  );
+import DashboardContainer from "@/src/components/shared/DashboardContainer";
+
+export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
+  return <DashboardContainer>{children}</DashboardContainer>;
 }
