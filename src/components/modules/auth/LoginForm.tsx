@@ -13,14 +13,18 @@ import { Button } from "../../ui/button";
 import { Alert, AlertDescription } from "../../ui/alert";
 import AppSubmitButton from "../../shared/form/AppSubmitButton";
 
-const LoginForm = () => {
+interface LoginFormProps {
+    redirectPath?: string;
+}
+
+const LoginForm = ({redirectPath} : LoginFormProps) => {
     // const queryClient = useQueryClient();
 
     const [serverError, setServerError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
     const { mutateAsync , isPending} = useMutation({
-        mutationFn : (payload : ILoginPayload) => loginAction(payload),
+        mutationFn : (payload : ILoginPayload) => loginAction(payload , redirectPath),
     })
 
     const form = useForm({

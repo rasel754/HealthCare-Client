@@ -1,113 +1,197 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { Role } from "@/src/types/auth.type";
+import { NextRequest, NextResponse } from "next/server";
+import { getDefaultDashboardRoute, getRouteOwner, isAuthRoute, UserRole } from "./lib/authUtils";
+import jwtUtils from "./lib/jwtUtils";
+import { getNewTokensWithRefreshToken, getUserInfo } from "./services/auth.services";
+import { isTokenExpiringSoon } from "./lib/tokenUtils";
 
-interface DecodedToken {
-  id?: string;
-  email?: string;
-  role?: string;
-  exp?: number;
+
+async function refreshTokenMiddleware (refreshToken : string) : Promise<boolean> {
+    try {
+        const refresh = await getNewTokensWithRefreshToken(refreshToken);
+        if(!refresh){
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error("Error refreshing token in middleware:", error);
+        return false;   
+    }
 }
 
-function decodeJwtToken(token: string): DecodedToken | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const base64Url = parts[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    const decoded = JSON.parse(jsonPayload);
-    
-    // Check expiration if exp field exists
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-      return null;
-    }
-    return decoded;
-  } catch {
-    return null;
-  }
-}
 
-function getRoleDashboard(role?: string): string {
-  if (role === Role.SUPER_ADMIN || role === Role.ADMIN) {
-    return "/admin/dashboard";
-  }
-  if (role === Role.DOCTOR) {
-    return "/doctor/dashboard";
-  }
-  return "/dashboard";
-}
+export async function proxy (request : NextRequest) {
+   try {
+       const { pathname } = request.nextUrl; // eg /dashboard, /admin/dashboard, /doctor/dashboard
+       const accessToken = request.cookies.get("accessToken")?.value;
+       const refreshToken = request.cookies.get("refreshToken")?.value;
 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get("accessToken")?.value;
-  const decodedToken = accessToken ? decodeJwtToken(accessToken) : null;
-  const userRole = decodedToken?.role;
-  const isAuthenticated = !!decodedToken;
+       const decodedAccessToken =  accessToken && jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string).data;
 
-  const isAuthRoute = pathname === "/login" || pathname === "/register";
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isDoctorRoute = pathname.startsWith("/doctor");
-  const isPatientRoute = pathname.startsWith("/dashboard");
-  const isCommonProtectedRoute = pathname.startsWith("/my-profile") || pathname.startsWith("/change-password");
+       const isValidAccessToken = accessToken && jwtUtils.verifyToken(accessToken, process.env.JWT_ACCESS_SECRET as string).success;
 
-  // 1. Authenticated users attempting to visit login/register should be redirected to their dashboard
-  if (isAuthRoute) {
-    if (isAuthenticated && userRole) {
-      const destination = getRoleDashboard(userRole);
-      return NextResponse.redirect(new URL(destination, request.url));
-    }
-    return NextResponse.next();
-  }
+       let userRole: UserRole | null = null;
 
-  // 2. Unauthenticated users attempting to visit protected routes -> redirect to login
-  if (!isAuthenticated && (isAdminRoute || isDoctorRoute || isPatientRoute || isCommonProtectedRoute)) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+       if(decodedAccessToken){
+            userRole = decodedAccessToken.role as UserRole;
+       }
 
-  // 3. Role-Based Access Control for Admin Routes
-  if (isAdminRoute) {
-    if (userRole !== Role.SUPER_ADMIN && userRole !== Role.ADMIN) {
-      const destination = getRoleDashboard(userRole);
-      return NextResponse.redirect(new URL(destination, request.url));
-    }
+       const routerOwner = getRouteOwner(pathname);
 
-    // Super Admin restricted sub-route
-    if (pathname.startsWith("/admin/dashboard/admins-management") && userRole !== Role.SUPER_ADMIN) {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-    }
-  }
+       const unifySuperAdminAndAdminRole = userRole === "SUPER_ADMIN" ? "ADMIN" : userRole;
 
-  // 4. Role-Based Access Control for Doctor Routes
-  if (isDoctorRoute) {
-    if (userRole !== Role.DOCTOR) {
-      const destination = getRoleDashboard(userRole);
-      return NextResponse.redirect(new URL(destination, request.url));
-    }
-  }
+       userRole = unifySuperAdminAndAdminRole;
 
-  // 5. Role-Based Access Control for Patient Routes (/dashboard)
-  if (isPatientRoute) {
-    if (userRole === Role.SUPER_ADMIN || userRole === Role.ADMIN) {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-    }
-    if (userRole === Role.DOCTOR) {
-      return NextResponse.redirect(new URL("/doctor/dashboard", request.url));
-    }
-  }
+       const isAuth = isAuthRoute(pathname);
 
-  return NextResponse.next();
+
+       //proactively refresh token if refresh token exists and access token is expired or about to expire
+       if (isValidAccessToken && refreshToken && (await isTokenExpiringSoon(accessToken))){
+            const requestHeaders = new Headers(request.headers);
+
+            const response = NextResponse.next({
+                request: {
+                    headers : requestHeaders
+            
+                },
+            })
+
+
+            try {
+                const refreshed = await refreshTokenMiddleware(refreshToken);
+
+                if(refreshed){
+                    requestHeaders.set("x-token-refreshed", "1");
+                }
+
+                return NextResponse.next(
+                    {
+                        request: {
+                            headers : requestHeaders
+                        },
+                        headers : response.headers
+                    }
+                )
+            } catch (error) {
+                console.error("Error refreshing token:", error);
+
+            }
+
+            return response;
+       }
+
+
+       // Rule - 1 : User is logged in (has access token) and trying to access auth route -> allow
+       if(isAuth && isValidAccessToken){
+        return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+       }
+
+       // Rule - 2 : User is trying to access reset password page
+       if(pathname === "/reset-password"){
+
+        const email = request.nextUrl.searchParams.get("email");
+
+            // case - 1 user has needPasswordChange true
+            //no need for case 1 if need password change is handled from change-password page
+            if(accessToken && email){
+                const userInfo = await getUserInfo();
+
+                if(userInfo.needPasswordChange){
+                    return NextResponse.next();
+                }else{
+                    return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+                }
+            }
+
+            // Case-2 user coming from forgot password
+
+            if(email){
+                return NextResponse.next();
+            }
+
+            const loginUrl = new URL("/login", request.url);
+            loginUrl.searchParams.set("redirect", pathname);
+            return NextResponse.redirect(loginUrl);
+       }
+
+       // Rule-3 User trying to access Public route -> allow
+       if(routerOwner === null){
+        return NextResponse.next();
+       }
+
+       // Rule - 4 User is Not logged in but trying to access protected route -> redirect to login
+       if(!accessToken || !isValidAccessToken){
+        const loginUrl = new URL("/login", request.url);
+        loginUrl.searchParams.set("redirect", pathname);
+        return NextResponse.redirect(loginUrl);
+       }
+
+       //Rule - Enforcing user to stay in reset password or verify email page if their needPasswordChange or isEmailVerified flags are not satisfied respectively
+
+       if(accessToken){
+            const userInfo = await getUserInfo();
+
+            if(userInfo){
+                // need email verification scenario
+                if(userInfo.emailVerified === false){
+                    if(pathname !== "/verify-email"){
+                        const verifyEmailUrl = new URL("/verify-email", request.url);
+                        verifyEmailUrl.searchParams.set("email", userInfo.email);
+                        return NextResponse.redirect(verifyEmailUrl);
+                    }
+
+                    return NextResponse.next();
+                }
+
+                if(userInfo.emailVerified && pathname === "/verify-email"){
+                    return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+                }
+
+                // need password change scenario
+                if (userInfo.needPasswordChange){
+                    if(pathname !== "/reset-password"){
+                        const resetPasswordUrl = new URL("/reset-password", request.url);
+                        resetPasswordUrl.searchParams.set("email", userInfo.email);
+                        return NextResponse.redirect(resetPasswordUrl);
+                    }
+
+                    return NextResponse.next();
+                }
+
+                if(!userInfo.needPasswordChange && pathname === "/reset-password"){
+                    return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+                }
+            }
+       }
+
+       // Rule - 5 User trying to access Common protected route -> allow
+       if(routerOwner === "COMMON"){
+        return NextResponse.next();
+       }
+
+       //Rule-6 User trying to visit role based protected but doesn't have required role -> redirect to their default dashboard
+
+       if(routerOwner === "ADMIN" || routerOwner === "DOCTOR" || routerOwner === "PATIENT"){
+            if(routerOwner !== userRole){
+                return NextResponse.redirect(new URL(getDefaultDashboardRoute(userRole as UserRole), request.url));
+            }
+       }
+
+       return NextResponse.next();
+
+   } catch (error) {
+         console.error("Error in proxy middleware:", error);
+   }
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-  ],
-};
+    matcher : [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - api (API routes)
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+         */
+        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.well-known).*)',
+    ]
+}
