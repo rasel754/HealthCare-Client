@@ -32,7 +32,13 @@ export const loginService = async (payload: ILoginPayload): Promise<ILoginRespon
     }
     return { success: false, message: response.message || "Login failed" };
   } catch (error: any) {
-    return { success: false, message: error?.message || "Login failed" };
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.errorMessage ||
+      error?.response?.data?.errorSources?.[0]?.message ||
+      error?.message ||
+      "Login failed";
+    return { success: false, message, error: error?.response?.data };
   }
 };
 
@@ -40,12 +46,33 @@ export const registerPatientService = async (payload: IRegisterPayload): Promise
   try {
     return await httpClient.post<IRegisterResponse>("/auth/register", payload);
   } catch (error: any) {
-    return { success: false, message: error?.message || "Registration failed" };
+    if (error?.code === "ECONNREFUSED") {
+      return { success: false, message: "Unable to connect to backend server. Please make sure the server is running on port 5000." };
+    }
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.errorMessage ||
+      error?.response?.data?.errorSources?.[0]?.message ||
+      error?.message ||
+      "Registration failed";
+    return { success: false, message, error: error?.response?.data };
   }
 };
 
 export const getMeService = async (): Promise<ApiResponse<IUser> | ApiErrorResponse> => {
   try {
+    let accessToken: string | undefined;
+    let sessionToken: string | undefined;
+    try {
+      const cookieStore = await cookies();
+      accessToken = cookieStore.get("accessToken")?.value;
+      sessionToken = cookieStore.get("better-auth.session_token")?.value;
+    } catch {
+      // cookies unavailable during build
+    }
+    if (!accessToken && !sessionToken) {
+      return { success: false, message: "Unauthenticated" };
+    }
     return await httpClient.get<IUser>("/auth/me");
   } catch (error: any) {
     return { success: false, message: error?.message || "Failed to fetch user details" };
@@ -71,7 +98,8 @@ export const verifyEmailService = async (payload: IVerifyEmailPayload): Promise<
   try {
     return await httpClient.post<null>("/auth/verify-email", payload);
   } catch (error: any) {
-    return { success: false, message: error?.message || "Email verification failed" };
+    const message = error?.response?.data?.message || error?.message || "Email verification failed";
+    return { success: false, message, error: error?.response?.data };
   }
 };
 
@@ -79,7 +107,8 @@ export const forgetPasswordService = async (payload: IForgetPasswordPayload): Pr
   try {
     return await httpClient.post<null>("/auth/forget-password", payload);
   } catch (error: any) {
-    return { success: false, message: error?.message || "Forget password request failed" };
+    const message = error?.response?.data?.message || error?.message || "Forget password request failed";
+    return { success: false, message, error: error?.response?.data };
   }
 };
 
@@ -87,7 +116,8 @@ export const resetPasswordService = async (payload: IResetPasswordPayload): Prom
   try {
     return await httpClient.post<null>("/auth/reset-password", payload);
   } catch (error: any) {
-    return { success: false, message: error?.message || "Password reset failed" };
+    const message = error?.response?.data?.message || error?.message || "Password reset failed";
+    return { success: false, message, error: error?.response?.data };
   }
 };
 
@@ -95,7 +125,8 @@ export const changePasswordService = async (payload: IChangePasswordPayload): Pr
   try {
     return await httpClient.post<null>("/auth/change-password", payload);
   } catch (error: any) {
-    return { success: false, message: error?.message || "Change password failed" };
+    const message = error?.response?.data?.message || error?.message || "Change password failed";
+    return { success: false, message, error: error?.response?.data };
   }
 };
 
@@ -138,8 +169,13 @@ export async function getNewTokensWithRefreshToken(refreshToken  : string) : Pro
 
 export async function getUserInfo() {
     try {
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get("accessToken")?.value;
+        let accessToken: string | undefined;
+        try {
+            const cookieStore = await cookies();
+            accessToken = cookieStore.get("accessToken")?.value;
+        } catch {
+            return null;
+        }
 
         if (!accessToken) {
             return null;

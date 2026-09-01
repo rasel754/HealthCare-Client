@@ -2,19 +2,20 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getDoctorsService, createDoctorService, deleteDoctorService } from "@/src/services/doctor.services";
+import { getDoctorsService, createDoctorService, updateDoctorService, deleteDoctorService } from "@/src/services/doctor.services";
 import { getSpecialtiesService } from "@/src/services/specialty.services";
 import { IDoctor, ISpecialty } from "@/src/types/domain.types";
 import { Gender } from "@/src/types/auth.type";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Stethoscope, Plus, Search, Trash2, Edit, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Stethoscope, Plus, Search, Trash2, Edit, X } from "lucide-react";
 
 export default function DoctorsManagementPage() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState<IDoctor | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   // Form State for creating doctor
@@ -30,6 +31,17 @@ export default function DoctorsManagementPage() {
   const [experience, setExperience] = useState<number>(5);
   const [gender, setGender] = useState<Gender>(Gender.MALE);
   const [selectedSpecialtyIds, setSelectedSpecialtyIds] = useState<string[]>([]);
+
+  // Form State for editing doctor
+  const [editName, setEditName] = useState("");
+  const [editContact, setEditContact] = useState("");
+  const [editRegNum, setEditRegNum] = useState("");
+  const [editQual, setEditQual] = useState("");
+  const [editDesig, setEditDesig] = useState("");
+  const [editWorkPlace, setEditWorkPlace] = useState("");
+  const [editFee, setEditFee] = useState<number>(50);
+  const [editExp, setEditExp] = useState<number>(5);
+  const [editGender, setEditGender] = useState<Gender>(Gender.MALE);
 
   const { data: specialtiesResponse } = useQuery({
     queryKey: ["specialties"],
@@ -60,6 +72,22 @@ export default function DoctorsManagementPage() {
     },
   });
 
+  const updateDoctorMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) => updateDoctorService(id, payload),
+    onSuccess: (res) => {
+      if ("success" in res && !res.success) {
+        setMsg(res.message);
+      } else {
+        setMsg("Doctor profile updated successfully!");
+        setTimeout(() => {
+          setEditingDoctor(null);
+          setMsg(null);
+          queryClient.invalidateQueries({ queryKey: ["doctors"] });
+        }, 1200);
+      }
+    },
+  });
+
   const deleteDoctorMutation = useMutation({
     mutationFn: (id: string) => deleteDoctorService(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["doctors"] }),
@@ -83,6 +111,39 @@ export default function DoctorsManagementPage() {
         gender,
       },
       specialties: selectedSpecialtyIds,
+    });
+  };
+
+  const openEditModal = (doc: IDoctor) => {
+    setEditingDoctor(doc);
+    setEditName(doc.name || "");
+    setEditContact(doc.contactNumber || "");
+    setEditRegNum(doc.registrationNumber || "");
+    setEditQual(doc.qualification || "");
+    setEditDesig(doc.designation || "");
+    setEditWorkPlace(doc.currentWorkingPlace || "");
+    setEditFee(doc.appointmentFee || 50);
+    setEditExp(doc.experience || 5);
+    setEditGender(doc.gender || Gender.MALE);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDoctor) return;
+    setMsg(null);
+    updateDoctorMutation.mutate({
+      id: editingDoctor.id,
+      payload: {
+        name: editName,
+        contactNumber: editContact,
+        registrationNumber: editRegNum,
+        qualification: editQual,
+        designation: editDesig,
+        currentWorkingPlace: editWorkPlace,
+        appointmentFee: Number(editFee),
+        experience: Number(editExp),
+        gender: editGender,
+      },
     });
   };
 
@@ -141,12 +202,23 @@ export default function DoctorsManagementPage() {
                       <p className="text-xs text-primary font-semibold">{doc.designation}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => deleteDoctorMutation.mutate(doc.id)}
-                    className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEditModal(doc)}
+                      className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                      title="Edit Doctor Profile"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => deleteDoctorMutation.mutate(doc.id)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+                      title="Delete Doctor Account"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="bg-slate-50 p-3 rounded-2xl space-y-1 text-xs text-slate-600">
@@ -241,7 +313,6 @@ export default function DoctorsManagementPage() {
                 </div>
               </div>
 
-              {/* Select Specialties */}
               <div className="space-y-2 pt-2">
                 <Label>Assign Medical Specialties</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto pr-1">
@@ -265,6 +336,83 @@ export default function DoctorsManagementPage() {
 
               <Button type="submit" disabled={createDoctorMutation.isPending} className="w-full rounded-xl mt-4 h-11 font-semibold">
                 {createDoctorMutation.isPending ? "Creating..." : "Create Doctor Account"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Doctor Modal */}
+      {editingDoctor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-xl">Edit Doctor Profile</h3>
+              <button onClick={() => setEditingDoctor(null)}>
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+
+            {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>Doctor Name</Label>
+                  <Input required value={editName} onChange={(e) => setEditName(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+                <div>
+                  <Label>Contact Number</Label>
+                  <Input required value={editContact} onChange={(e) => setEditContact(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>Registration Number</Label>
+                  <Input required value={editRegNum} onChange={(e) => setEditRegNum(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+                <div>
+                  <Label>Qualification</Label>
+                  <Input required value={editQual} onChange={(e) => setEditQual(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>Designation</Label>
+                  <Input required value={editDesig} onChange={(e) => setEditDesig(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+                <div>
+                  <Label>Current Working Place</Label>
+                  <Input required value={editWorkPlace} onChange={(e) => setEditWorkPlace(e.target.value)} className="rounded-xl mt-1" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label>Appointment Fee ($)</Label>
+                  <Input required type="number" value={editFee} onChange={(e) => setEditFee(Number(e.target.value))} className="rounded-xl mt-1" />
+                </div>
+                <div>
+                  <Label>Experience (Years)</Label>
+                  <Input required type="number" value={editExp} onChange={(e) => setEditExp(Number(e.target.value))} className="rounded-xl mt-1" />
+                </div>
+                <div>
+                  <Label>Gender</Label>
+                  <select
+                    value={editGender}
+                    onChange={(e) => setEditGender(e.target.value as Gender)}
+                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium mt-1"
+                  >
+                    <option value={Gender.MALE}>Male</option>
+                    <option value={Gender.FEMALE}>Female</option>
+                  </select>
+                </div>
+              </div>
+
+              <Button type="submit" disabled={updateDoctorMutation.isPending} className="w-full rounded-xl mt-4 h-11 font-semibold">
+                {updateDoctorMutation.isPending ? "Updating..." : "Save Doctor Profile"}
               </Button>
             </form>
           </div>

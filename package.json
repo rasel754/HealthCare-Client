@@ -1,12 +1,12 @@
 {
-  "name": "healthcare-client",
+  "name": "HealthCare-Client",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "lint": "eslint",
-    "dev": "bun --bun next dev",
-    "build": "bun --bun next build",
-    "start": "bun --bun next start"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

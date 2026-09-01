@@ -1,5 +1,3 @@
-"use server"
-
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { setCookie } from "./cookieUtils";
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { httpClient } from "@/src/lib/axios/httpClient";
+import { getPatientsService } from "@/src/services/patient.services";
 import { changeUserStatusService } from "@/src/services/admin.services";
 import { IPatient } from "@/src/types/domain.types";
 import { UserStatus } from "@/src/types/auth.type";
@@ -17,13 +17,9 @@ export default function PatientsManagementPage() {
 
   const { data: patientsResponse, isLoading } = useQuery({
     queryKey: ["patients", searchTerm],
-    queryFn: async () => {
-      const response = await httpClient.get<IPatient[]>("/patient", {
-        params: { searchTerm: searchTerm || undefined, limit: 50 },
-      });
-      return response;
-    },
+    queryFn: () => getPatientsService({ searchTerm: searchTerm || undefined, limit: 50 }),
   });
+
 
   const patients = (patientsResponse && "data" in patientsResponse ? patientsResponse.data : []) as IPatient[];
 

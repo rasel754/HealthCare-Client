@@ -64,3 +64,8 @@ export const changeUserRoleService = async (userId: string, role: Role): Promise
 export const getSuperAdminsService = async (params?: IQueryParams): Promise<ApiResponse<ISuperAdmin[]>> => {
   return await httpClient.get<ISuperAdmin[]>("/super-admins", { params });
 };
+
+export const getPaymentsService = async (params?: IQueryParams): Promise<ApiResponse<any[]>> => {
+  return await httpClient.get<any[]>("/payment", { params });
+};
+

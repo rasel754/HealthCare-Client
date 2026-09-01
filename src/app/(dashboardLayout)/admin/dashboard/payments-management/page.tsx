@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { httpClient } from "@/src/lib/axios/httpClient";
+import { getPaymentsService } from "@/src/services/admin.services";
 import { IPayment } from "@/src/types/domain.types";
 import { PaymentStatus } from "@/src/types/auth.type";
 import { Input } from "@/src/components/ui/input";
@@ -13,13 +13,9 @@ export default function PaymentsManagementPage() {
 
   const { data: paymentsResponse, isLoading } = useQuery({
     queryKey: ["admin-payments", searchTerm],
-    queryFn: async () => {
-      const response = await httpClient.get<IPayment[]>("/payment", {
-        params: { searchTerm: searchTerm || undefined, limit: 50 },
-      });
-      return response;
-    },
+    queryFn: () => getPaymentsService({ searchTerm: searchTerm || undefined, limit: 50 }),
   });
+
 
   const payments = (paymentsResponse && "data" in paymentsResponse ? paymentsResponse.data : []) as IPayment[];
 

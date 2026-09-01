@@ -20,10 +20,14 @@ async function tryRefreshToken(
         return;
     }
 
-    const requestHeader = await headers();
+    try {
+        const requestHeader = await headers();
 
-    if (requestHeader.get("x-token-refreshed") === "1") {
-        return; // avoid multiple refresh attempts in the same request lifecycle
+        if (requestHeader.get("x-token-refreshed") === "1") {
+            return; // avoid multiple refresh attempts in the same request lifecycle
+        }
+    } catch {
+        // ignore when headers() is unavailable during build
     }
 
     try {
@@ -34,19 +38,23 @@ async function tryRefreshToken(
 }
 
 const axiosInstance = async () => {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const refreshToken = cookieStore.get("refreshToken")?.value;
+    let cookieHeader = "";
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get("accessToken")?.value;
+        const refreshToken = cookieStore.get("refreshToken")?.value;
 
-    if(accessToken && refreshToken){
-        await tryRefreshToken(accessToken, refreshToken);
+        if(accessToken && refreshToken){
+            await tryRefreshToken(accessToken, refreshToken);
+        }
+
+        cookieHeader = cookieStore
+                                    .getAll()
+                                    .map((cookie) => `${cookie.name}=${cookie.value}`)
+                                    .join("; ");    
+    } catch {
+        // ignore when cookies() is unavailable during SSG build
     }
-
-    const cookieHeader = cookieStore
-                                .getAll()
-                                .map((cookie) => `${cookie.name}=${cookie.value}`)
-                                .join("; ");    
-    // eg Cookie: "accessToken=abc123; refreshToken=def456"
 
     const instance = axios.create({
         baseURL : API_BASE_URL,
@@ -65,6 +73,16 @@ export interface ApiRequestOptions {
     headers?: Record<string, string>;
 }
 
+const logHttpError = (method: string, endpoint: string, error: any) => {
+    if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
+        console.error(`${method} request to ${endpoint} failed (${status || 'No Response'}): ${message}`);
+    } else {
+        console.error(`${method} request to ${endpoint} failed:`, error?.message || error);
+    }
+};
+
 const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
     try {     
         const instance = await axiosInstance();   
@@ -74,7 +92,7 @@ const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions) : P
         });
         return response.data;
     } catch (error) {       
-        console.error(`GET request to ${endpoint} failed:`, error);
+        logHttpError('GET', endpoint, error);
         throw error;
     }
 }
@@ -88,7 +106,7 @@ const httpPost = async <TData>(endpoint: string, data: unknown, options?: ApiReq
         });
         return response.data;
     } catch (error) {
-        console.error(`POST request to ${endpoint} failed:`, error);
+        logHttpError('POST', endpoint, error);
         throw error;
     }
 }
@@ -102,7 +120,7 @@ const httpPut = async <TData>(endpoint: string, data: unknown, options?: ApiRequ
         });
         return response.data;
     } catch (error) {
-        console.error(`PUT request to ${endpoint} failed:`, error);
+        logHttpError('PUT', endpoint, error);
         throw error;
     }
 }
@@ -117,29 +135,65 @@ const httpPatch = async <TData>(endpoint: string, data: unknown, options?: ApiRe
         return response.data;
     }
     catch (error) {
-        console.error(`PATCH request to ${endpoint} failed:`, error);
+        logHttpError('PATCH', endpoint, error);
         throw error;
     }
 }
 
-const httpDelete =  async <TData>(endpoint: string, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
-    try {
-        const instance = await axiosInstance();
-        const response = await instance.delete<ApiResponse<TData>>(endpoint, {
-            params: options?.params,
-            headers: options?.headers,
-        });
-        return response.data;
-    } catch (error) {
-        console.error(`DELETE request to ${endpoint} failed:`, error);
-        throw error;
-    }
-}
+const httpDelete = async <TData>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
+  try {
+    const instance = await axiosInstance();
+    const response = await instance.delete<ApiResponse<TData>>(endpoint, {
+      params: options?.params,
+      headers: options?.headers,
+    });
+    return response.data;
+  } catch (error) {
+    logHttpError('DELETE', endpoint, error);
+    throw error;
+  }
+};
+
+const httpPostForm = async <TData>(endpoint: string, data: FormData, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
+  try {
+    const instance = await axiosInstance();
+    const response = await instance.post<ApiResponse<TData>>(endpoint, data, {
+      params: options?.params,
+      headers: {
+        ...options?.headers,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    logHttpError('POST Form', endpoint, error);
+    throw error;
+  }
+};
+
+const httpPatchForm = async <TData>(endpoint: string, data: FormData, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
+  try {
+    const instance = await axiosInstance();
+    const response = await instance.patch<ApiResponse<TData>>(endpoint, data, {
+      params: options?.params,
+      headers: {
+        ...options?.headers,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    logHttpError('PATCH Form', endpoint, error);
+    throw error;
+  }
+};
 
 export const httpClient = {
-    get: httpGet,
-    post: httpPost,
-    put: httpPut,
-    patch: httpPatch,
-    delete: httpDelete,
-}
+  get: httpGet,
+  post: httpPost,
+  put: httpPut,
+  patch: httpPatch,
+  delete: httpDelete,
+  postForm: httpPostForm,
+  patchForm: httpPatchForm,
+};

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAdminsService, createAdminService, createSuperAdminService, deleteAdminService } from "@/src/services/admin.services";
+import { getAdminsService, getSuperAdminsService, createAdminService, createSuperAdminService, deleteAdminService, changeUserRoleService } from "@/src/services/admin.services";
 import { Role } from "@/src/types/auth.type";
-import { IAdmin } from "@/src/types/domain.types";
+import { IAdmin, ISuperAdmin } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { ShieldCheck, Plus, Trash2, X, User } from "lucide-react";
+import { ShieldCheck, Plus, Trash2, X, RefreshCw } from "lucide-react";
 
 export default function AdminsManagementPage() {
   const queryClient = useQueryClient();
@@ -25,7 +25,13 @@ export default function AdminsManagementPage() {
     queryFn: () => getAdminsService({ limit: 50 }),
   });
 
+  const { data: superAdminsResponse } = useQuery({
+    queryKey: ["super-admins"],
+    queryFn: () => getSuperAdminsService({ limit: 50 }),
+  });
+
   const admins = (adminsResponse && "data" in adminsResponse ? adminsResponse.data : []) as IAdmin[];
+  const superAdmins = (superAdminsResponse && "data" in superAdminsResponse ? superAdminsResponse.data : []) as ISuperAdmin[];
 
   const createAdminMutation = useMutation({
     mutationFn: (payload: { password: string; admin: Partial<IAdmin>; role: Role }) => {
@@ -47,14 +53,32 @@ export default function AdminsManagementPage() {
           setContactNumber("");
           setMsg(null);
           queryClient.invalidateQueries({ queryKey: ["admins"] });
+          queryClient.invalidateQueries({ queryKey: ["super-admins"] });
         }, 1200);
+      }
+    },
+  });
+
+  const changeRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: Role }) => changeUserRoleService(userId, role),
+    onSuccess: (res) => {
+      if ("success" in res && !res.success) {
+        setMsg(res.message);
+      } else {
+        setMsg("User role updated successfully!");
+        setTimeout(() => setMsg(null), 1500);
+        queryClient.invalidateQueries({ queryKey: ["admins"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admins"] });
       }
     },
   });
 
   const deleteAdminMutation = useMutation({
     mutationFn: (id: string) => deleteAdminService(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admins"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      queryClient.invalidateQueries({ queryKey: ["super-admins"] });
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,16 +96,18 @@ export default function AdminsManagementPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">System Administrators</h1>
-          <p className="text-xs text-slate-500 mt-1">Manage administrative staff and super admins</p>
+          <p className="text-xs text-slate-500 mt-1">Manage administrative staff and super admin credentials</p>
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="rounded-xl gap-2 h-11 px-5">
           <Plus className="h-4 w-4" /> Create Admin Account
         </Button>
       </div>
 
+      {msg && <div className="p-3.5 bg-primary/10 border border-primary/20 rounded-xl text-primary text-xs font-bold">{msg}</div>}
+
       {isLoading ? (
         <div className="py-12 text-center text-xs text-slate-500">Loading administrators...</div>
-      ) : admins.length === 0 ? (
+      ) : admins.length === 0 && superAdmins.length === 0 ? (
         <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3 shadow-xs">
           <ShieldCheck className="h-12 w-12 text-slate-300 mx-auto" />
           <h3 className="text-base font-bold text-slate-800">No Admins Registered</h3>
@@ -90,23 +116,72 @@ export default function AdminsManagementPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {admins.map((adm) => (
-            <div key={adm.id} className="bg-white rounded-3xl border border-slate-200 p-6 flex items-start justify-between shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
-                  {adm.name[0]}
+            <div key={adm.id} className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between shadow-xs space-y-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
+                    {adm.name[0]}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">{adm.name}</h3>
+                    <p className="text-xs text-slate-500">{adm.email}</p>
+                    <span className="inline-block mt-1 bg-slate-100 text-slate-800 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase">
+                      ADMIN
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">{adm.name}</h3>
-                  <p className="text-xs text-slate-500">{adm.email}</p>
+
+                <button
+                  onClick={() => deleteAdminMutation.mutate(adm.id)}
+                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+                  title="Delete Admin"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => changeRoleMutation.mutate({ userId: adm.id, role: Role.SUPER_ADMIN })}
+                  disabled={changeRoleMutation.isPending}
+                  className="rounded-xl text-xs gap-1.5"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Promote to Super Admin
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {superAdmins.map((sadm) => (
+            <div key={sadm.id} className="bg-white rounded-3xl border border-slate-900/20 p-6 flex flex-col justify-between shadow-sm space-y-4 ring-1 ring-slate-900/5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-lg">
+                    {sadm.name[0]}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">{sadm.name}</h3>
+                    <p className="text-xs text-slate-500">{sadm.email}</p>
+                    <span className="inline-block mt-1 bg-primary/10 text-primary font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase">
+                      SUPER ADMIN
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => deleteAdminMutation.mutate(adm.id)}
-                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => changeRoleMutation.mutate({ userId: sadm.id, role: Role.ADMIN })}
+                  disabled={changeRoleMutation.isPending}
+                  className="rounded-xl text-xs gap-1.5"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> Demote to Admin
+                </Button>
+              </div>
             </div>
           ))}
         </div>

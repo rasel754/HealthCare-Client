@@ -2,108 +2,192 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { resetPasswordZodSchema, IResetPasswordPayload } from "@/src/zod/auth.validation";
 import { resetPasswordService } from "@/src/services/auth.services";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { Lock, Mail, KeyRound, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
+import AppField from "../../shared/form/AppField";
+import AppSubmitButton from "../../shared/form/AppSubmitButton";
+import { Button } from "../../ui/button";
+import { Alert, AlertDescription } from "../../ui/alert";
+import { Lock, Mail, KeyRound, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
 export default function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const defaultEmail = searchParams.get("email") || "";
 
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IResetPasswordPayload>({
-    resolver: zodResolver(resetPasswordZodSchema),
-    defaultValues: { email: defaultEmail },
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (payload: IResetPasswordPayload) => resetPasswordService(payload),
   });
 
-  const onSubmit = async (data: IResetPasswordPayload) => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    setLoading(true);
-    try {
-      const res = await resetPasswordService(data);
-      if ("success" in res && !res.success) {
-        setErrorMsg(res.message);
-      } else {
-        setSuccessMsg("Password reset successfully! Redirecting to login...");
-        setTimeout(() => router.push("/login"), 1500);
+  const form = useForm({
+    defaultValues: {
+      email: defaultEmail,
+      otp: "",
+      newPassword: "",
+    } as IResetPasswordPayload,
+    onSubmit: async ({ value }) => {
+      setServerError(null);
+      setSuccessMsg(null);
+      try {
+        const res = (await mutateAsync(value)) as any;
+        if (res && "success" in res && !res.success) {
+          setServerError(res.message || "Password reset failed");
+        } else {
+          setSuccessMsg("Password reset successfully! Redirecting to login...");
+          setTimeout(() => router.push("/login"), 1200);
+        }
+      } catch (err: any) {
+        console.error("Reset password error:", err);
+        setServerError(err.message || "Password reset failed");
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Password reset failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-      <div className="text-center mb-8">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
+    <Card className="w-full max-w-md mx-auto shadow-lg border border-border bg-card text-card-foreground">
+      <CardHeader className="text-center pb-4">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
           <Lock className="h-6 w-6" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Reset Password</h2>
-        <p className="text-sm text-slate-500 mt-1">Enter your OTP and new password</p>
-      </div>
+        <CardTitle className="text-2xl font-bold tracking-tight">Reset Password</CardTitle>
+        <CardDescription className="text-muted-foreground text-xs sm:text-sm">
+          Enter the OTP code received and set your new password
+        </CardDescription>
+      </CardHeader>
 
-      {errorMsg && (
-        <div className="mb-6 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 text-sm">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
+      <CardContent>
+        {serverError && (
+          <Alert variant="destructive" className="mb-4 py-2.5">
+            <AlertDescription className="text-xs">{serverError}</AlertDescription>
+          </Alert>
+        )}
 
-      {successMsg && (
-        <div className="mb-6 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-700 text-sm">
-          <CheckCircle2 className="h-5 w-5 shrink-0" />
-          <span>{successMsg}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="email">Email Address</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Input id="email" type="email" placeholder="patient@example.com" className="pl-9" {...register("email")} />
+        {successMsg && (
+          <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium animate-in fade-in duration-200">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>{successMsg}</span>
           </div>
-          {errors.email && <p className="text-xs text-rose-600 mt-1">{errors.email.message}</p>}
-        </div>
+        )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor="otp">Reset Code (OTP)</Label>
-          <div className="relative">
-            <KeyRound className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Input id="otp" placeholder="123456" className="pl-9 tracking-widest text-lg" {...register("otp")} />
-          </div>
-          {errors.otp && <p className="text-xs text-rose-600 mt-1">{errors.otp.message}</p>}
-        </div>
+        <form
+          method="POST"
+          action="#"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-4"
+        >
+          <form.Field
+            name="email"
+            validators={{ onChange: resetPasswordZodSchema.shape.email }}
+          >
+            {(field) => (
+              <AppField
+                field={field}
+                label="Email Address"
+                type="email"
+                placeholder="patient@example.com"
+                prepend={<Mail className="h-4 w-4" />}
+                required
+              />
+            )}
+          </form.Field>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="newPassword">New Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Input id="newPassword" type="password" placeholder="••••••••" className="pl-9" {...register("newPassword")} />
-          </div>
-          {errors.newPassword && <p className="text-xs text-rose-600 mt-1">{errors.newPassword.message}</p>}
-        </div>
+          <form.Field
+            name="otp"
+            validators={{ onChange: resetPasswordZodSchema.shape.otp }}
+          >
+            {(field) => (
+              <AppField
+                field={field}
+                label="Reset Code (OTP)"
+                placeholder="123456"
+                prepend={<KeyRound className="h-4 w-4" />}
+                inputClassName="tracking-widest font-mono text-base"
+                required
+              />
+            )}
+          </form.Field>
 
-        <Button type="submit" disabled={loading} className="w-full rounded-xl mt-2">
-          {loading ? "Resetting..." : "Reset Password"}
-        </Button>
-      </form>
-    </div>
+          <form.Field
+            name="newPassword"
+            validators={{ onChange: resetPasswordZodSchema.shape.newPassword }}
+          >
+            {(field) => (
+              <AppField
+                field={field}
+                label="New Password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                prepend={<Lock className="h-4 w-4" />}
+                required
+                append={
+                  <Button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </Button>
+                }
+              />
+            )}
+          </form.Field>
+
+          <form.Subscribe
+            selector={(s) => [s.canSubmit, s.isSubmitting] as const}
+          >
+            {([canSubmit, isSubmitting]) => (
+              <AppSubmitButton
+                isPending={isSubmitting || isPending}
+                pendingLabel="Resetting Password..."
+                disabled={!canSubmit}
+                className="mt-2"
+              >
+                Reset Password
+              </AppSubmitButton>
+            )}
+          </form.Subscribe>
+        </form>
+      </CardContent>
+
+      <CardFooter className="justify-center border-t border-border pt-4">
+        <p className="text-xs text-muted-foreground">
+          Remembered credentials?{" "}
+          <Link
+            href="/login"
+            className="text-primary font-semibold hover:underline underline-offset-4 ml-1"
+          >
+            Back to Login
+          </Link>
+        </p>
+      </CardFooter>
+    </Card>
   );
 }
+

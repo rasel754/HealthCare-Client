@@ -7,23 +7,34 @@ export const setCookie = async (
     value : string,
     maxAgeInSeconds : number,
 ) => {
-    const cookieStore = await cookies();
-
-    cookieStore.set(name, value, {
-        httpOnly : true,
-        secure : true,
-        sameSite : "strict",
-        path : "/",
-        maxAge : maxAgeInSeconds,
-    })
+    try {
+        const cookieStore = await cookies();
+        cookieStore.set(name, value, {
+            httpOnly : true,
+            secure : process.env.NODE_ENV === "production",
+            sameSite : "strict",
+            path : "/",
+            maxAge : maxAgeInSeconds,
+        });
+    } catch {
+        // ignore when cookies unavailable
+    }
 }
 
 export const getCookie = async (name : string) => {
-    const cookieStore = await cookies();
-    return cookieStore.get(name)?.value;
+    try {
+        const cookieStore = await cookies();
+        return cookieStore.get(name)?.value;
+    } catch {
+        return undefined;
+    }
 }
 
 export const deleteCookie = async (name : string) => {
-    const cookieStore = await cookies();
-    cookieStore.delete(name);
+    try {
+        const cookieStore = await cookies();
+        cookieStore.delete(name);
+    } catch {
+        // ignore when cookies unavailable
+    }
 }

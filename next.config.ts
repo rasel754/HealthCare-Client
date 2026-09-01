@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
+  async rewrites() {
+    return [
+      {
+        source: "/forgot-password",
+        destination: "/forget-password",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

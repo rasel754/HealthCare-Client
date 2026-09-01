@@ -11,3 +11,8 @@ export const updateMyProfileService = async (formData: FormData): Promise<ApiRes
     return { success: false, message: error?.message || "Failed to update profile" };
   }
 };
+
+export const getPatientsService = async (params?: Record<string, unknown>): Promise<ApiResponse<IPatient[]>> => {
+  return await httpClient.get<IPatient[]>("/patient", { params });
+};
+

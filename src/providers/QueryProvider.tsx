@@ -47,9 +47,7 @@ export default function QueryProviders({ children }: { children: React.ReactNode
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryStreamedHydration>
-        {children}
-      </ReactQueryStreamedHydration>
+      {children}
     </QueryClientProvider>
   );
 }

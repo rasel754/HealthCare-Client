@@ -44,17 +44,25 @@ export const loginAction = async (payload : ILoginPayload, redirectPath ?: strin
         }
         
     } catch (error : any) {
-        console.log(error, "error");
         if(error && typeof error === "object" && "digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")){
             throw error;
         }
 
-        if (error && error.response && error.response.data.message === "Email not verified") {
+        if (error && error.response && error.response.data?.message === "Email not verified") {
             redirect(`/verify-email?email=${payload.email}`);
         }
+
+        if (error?.code === "ECONNREFUSED") {
+            return {
+                success: false,
+                message: "Unable to connect to backend server. Please make sure the server is running on port 5000.",
+            };
+        }
+
+        const serverErrorMessage = error?.response?.data?.message || error?.message || "Login failed";
         return {
             success: false,
-            message: `Login failed: ${error.message}`,
+            message: serverErrorMessage,
         }
     }
 }

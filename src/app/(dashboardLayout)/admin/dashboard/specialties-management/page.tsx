@@ -2,20 +2,29 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSpecialtiesService, createSpecialtyService, deleteSpecialtyService } from "@/src/services/specialty.services";
+import { getSpecialtiesService, createSpecialtyService, updateSpecialtyService, deleteSpecialtyService } from "@/src/services/specialty.services";
 import { ISpecialty } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
-import { Plus, Trash2, Layers, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Edit, Layers, X } from "lucide-react";
 
 export default function SpecialtiesManagementPage() {
   const queryClient = useQueryClient();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingSpecialty, setEditingSpecialty] = useState<ISpecialty | null>(null);
+  
+  // Create Form State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
+  // Edit Form State
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editFile, setEditFile] = useState<File | null>(null);
+  
   const [msg, setMsg] = useState<string | null>(null);
 
   const { data: specialtiesResponse, isLoading } = useQuery({
@@ -44,12 +53,31 @@ export default function SpecialtiesManagementPage() {
     },
   });
 
+  const updateSpecialtyMutation = useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) => updateSpecialtyService(id, formData),
+    onSuccess: (res) => {
+      if ("success" in res && !res.success) {
+        setMsg(res.message);
+      } else {
+        setMsg("Medical specialty updated successfully!");
+        setTimeout(() => {
+          setEditingSpecialty(null);
+          setEditTitle("");
+          setEditDescription("");
+          setEditFile(null);
+          setMsg(null);
+          queryClient.invalidateQueries({ queryKey: ["specialties"] });
+        }, 1200);
+      }
+    },
+  });
+
   const deleteSpecialtyMutation = useMutation({
     mutationFn: (id: string) => deleteSpecialtyService(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["specialties"] }),
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
     const formData = new FormData();
@@ -58,6 +86,25 @@ export default function SpecialtiesManagementPage() {
     if (file) formData.append("file", file);
 
     createSpecialtyMutation.mutate(formData);
+  };
+
+  const openEditModal = (s: ISpecialty) => {
+    setEditingSpecialty(s);
+    setEditTitle(s.title || "");
+    setEditDescription(s.description || "");
+    setEditFile(null);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSpecialty) return;
+    setMsg(null);
+    const formData = new FormData();
+    if (editTitle) formData.append("title", editTitle);
+    if (editDescription) formData.append("description", editDescription);
+    if (editFile) formData.append("file", editFile);
+
+    updateSpecialtyMutation.mutate({ id: editingSpecialty.id, formData });
   };
 
   return (
@@ -93,12 +140,23 @@ export default function SpecialtiesManagementPage() {
                   <p className="text-xs text-slate-500 mt-1 line-clamp-2">{s.description || "No description provided."}</p>
                 </div>
               </div>
-              <button
-                onClick={() => deleteSpecialtyMutation.mutate(s.id)}
-                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => openEditModal(s)}
+                  className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                  title="Edit Specialty"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => deleteSpecialtyMutation.mutate(s.id)}
+                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+                  title="Delete Specialty"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -117,7 +175,7 @@ export default function SpecialtiesManagementPage() {
 
             {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="title">Specialty Title</Label>
                 <Input
@@ -155,6 +213,61 @@ export default function SpecialtiesManagementPage() {
 
               <Button type="submit" disabled={createSpecialtyMutation.isPending} className="w-full rounded-xl mt-2">
                 {createSpecialtyMutation.isPending ? "Creating..." : "Save Specialty"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Specialty Modal */}
+      {editingSpecialty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-lg">Edit Medical Specialty</h3>
+              <button onClick={() => setEditingSpecialty(null)}>
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
+            </div>
+
+            {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="editTitle">Specialty Title</Label>
+                <Input
+                  id="editTitle"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="rounded-xl mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editDesc">Description</Label>
+                <Textarea
+                  id="editDesc"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="rounded-xl mt-1"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="editIconFile">New Icon Image File (Optional)</Label>
+                <Input
+                  id="editIconFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setEditFile(e.target.files?.[0] || null)}
+                  className="rounded-xl mt-1"
+                />
+              </div>
+
+              <Button type="submit" disabled={updateSpecialtyMutation.isPending} className="w-full rounded-xl mt-2">
+                {updateSpecialtyMutation.isPending ? "Updating..." : "Update Specialty"}
               </Button>
             </form>
           </div>
