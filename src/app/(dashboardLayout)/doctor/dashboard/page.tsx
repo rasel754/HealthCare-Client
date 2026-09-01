@@ -44,72 +44,72 @@ export default function DoctorDashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl">
             <Calendar className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Appointments</p>
-            <p className="text-2xl font-extrabold text-slate-900">{stats.appointmentCount || 0}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase">Appointments</p>
+            <p className="text-2xl font-extrabold text-foreground">{stats.appointmentCount || 0}</p>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xl">
             <Users className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Total Patients</p>
-            <p className="text-2xl font-extrabold text-slate-900">{stats.patientCount || 0}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase">Total Patients</p>
+            <p className="text-2xl font-extrabold text-foreground">{stats.patientCount || 0}</p>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xl">
             <Star className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Patient Reviews</p>
-            <p className="text-2xl font-extrabold text-slate-900">{stats.reviewCount || 0}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase">Patient Reviews</p>
+            <p className="text-2xl font-extrabold text-foreground">{stats.reviewCount || 0}</p>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xl">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xl">
             <DollarSign className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Revenue Earned</p>
-            <p className="text-2xl font-extrabold text-slate-900">${stats.totalRevenue || 0}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase">Revenue Earned</p>
+            <p className="text-2xl font-extrabold text-foreground">${stats.totalRevenue || 0}</p>
           </div>
         </div>
       </div>
 
       {/* Doctor Appointments Queue */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs">
+      <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 space-y-6 shadow-xs">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 text-lg">Upcoming Patient Consultations</h3>
+          <h3 className="font-bold text-foreground text-lg">Upcoming Patient Consultations</h3>
           <Link href="/doctor/dashboard/appointments" className="text-xs text-primary font-bold hover:underline flex items-center gap-1">
             Manage All <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {appointments.length === 0 ? (
-          <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-            <p className="text-xs text-slate-400">No active patient bookings queued.</p>
+          <div className="p-8 text-center bg-accent/30 rounded-2xl border border-dashed border-border">
+            <p className="text-xs text-muted-foreground">No active patient bookings queued.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {appointments.map((app) => (
-              <div key={app.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-between gap-4">
+              <div key={app.id} className="p-4 rounded-2xl border border-border bg-accent/40 flex items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">{app.patient?.name || "Patient"}</h4>
-                  <p className="text-xs text-slate-500">
+                  <h4 className="font-bold text-foreground text-sm">{app.patient?.name || "Patient"}</h4>
+                  <p className="text-xs text-muted-foreground">
                     {app.schedule?.startDate} • {app.schedule?.startTime} - {app.schedule?.endTime}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 uppercase">
                     {app.status}
                   </span>
                   {app.videoCallingId && (
@@ -117,7 +117,7 @@ export default function DoctorDashboardPage() {
                       href={`https://meet.jit.si/${app.videoCallingId}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1.5 bg-primary text-white text-xs font-semibold rounded-lg flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-lg flex items-center gap-1.5"
                     >
                       <Video className="h-3.5 w-3.5" /> Start Call
                     </a>

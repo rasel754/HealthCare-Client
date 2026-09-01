@@ -98,28 +98,28 @@ export default function HealthRecordPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Health Profile & Medical Records</h1>
-        <p className="text-xs text-slate-500 mt-1">Keep your personal health metrics and diagnostic reports updated</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Health Profile & Medical Records</h1>
+        <p className="text-xs text-muted-foreground mt-1">Keep your personal health metrics and diagnostic reports updated</p>
       </div>
 
       {errorMsg && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 text-sm">
+        <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center gap-3 text-rose-600 dark:text-rose-400 text-sm">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-700 text-sm">
+        <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-3 text-emerald-600 dark:text-emerald-400 text-sm">
           <CheckCircle2 className="h-5 w-5 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 p-8 space-y-8 shadow-xs">
+      <form onSubmit={handleSubmit} className="bg-card text-card-foreground rounded-3xl border border-border p-8 space-y-8 shadow-xs">
         {/* Personal Details */}
         <div className="space-y-4">
-          <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+          <h3 className="font-bold text-foreground text-base flex items-center gap-2">
             <User className="h-5 w-5 text-primary" /> Personal Information
           </h3>
 
@@ -141,9 +141,9 @@ export default function HealthRecordPage() {
         </div>
 
         {/* Health Data */}
-        <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-            <Activity className="h-5 w-5 text-emerald-600" /> Health Metrics & Vitals
+        <div className="space-y-4 pt-4 border-t border-border">
+          <h3 className="font-bold text-foreground text-base flex items-center gap-2">
+            <Activity className="h-5 w-5 text-emerald-600 dark:text-emerald-400" /> Health Metrics & Vitals
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -152,7 +152,7 @@ export default function HealthRecordPage() {
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium mt-1"
+                className="w-full h-10 px-3 border border-input bg-background text-foreground rounded-xl text-sm font-medium mt-1 focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value={Gender.MALE}>Male</option>
                 <option value={Gender.FEMALE}>Female</option>
@@ -170,7 +170,7 @@ export default function HealthRecordPage() {
               <select
                 value={bloodGroup}
                 onChange={(e) => setBloodGroup(e.target.value)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium mt-1"
+                className="w-full h-10 px-3 border border-input bg-background text-foreground rounded-xl text-sm font-medium mt-1 focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {Object.values(BloodGroup).map((bg) => (
                   <option key={bg} value={bg}>
@@ -193,7 +193,7 @@ export default function HealthRecordPage() {
           </div>
 
           <div className="flex items-center gap-6 pt-2">
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer">
               <input
                 type="checkbox"
                 checked={hasAllergies}
@@ -203,7 +203,7 @@ export default function HealthRecordPage() {
               Has Allergies
             </label>
 
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer">
               <input
                 type="checkbox"
                 checked={hasDiabetes}
@@ -216,9 +216,9 @@ export default function HealthRecordPage() {
         </div>
 
         {/* File Uploads */}
-        <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-            <FileUp className="h-5 w-5 text-blue-600" /> Upload Profile Photo & Medical Reports
+        <div className="space-y-4 pt-4 border-t border-border">
+          <h3 className="font-bold text-foreground text-base flex items-center gap-2">
+            <FileUp className="h-5 w-5 text-blue-600 dark:text-blue-400" /> Upload Profile Photo & Medical Reports
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

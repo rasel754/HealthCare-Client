@@ -14,37 +14,37 @@ export default function MyProfilePage() {
   const user = (userResponse && "data" in userResponse ? userResponse.data : null) as IUser | null;
 
   if (isLoading) {
-    return <div className="py-12 text-center text-xs text-slate-500">Loading user profile...</div>;
+    return <div className="py-12 text-center text-xs text-muted-foreground">Loading user profile...</div>;
   }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Profile</h1>
-        <p className="text-xs text-slate-500 mt-1">Authenticated user credentials and system account status</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">My Profile</h1>
+        <p className="text-xs text-muted-foreground mt-1">Authenticated user credentials and system account status</p>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 p-8 space-y-6 shadow-xs">
-        <div className="flex items-center gap-5 border-b border-slate-100 pb-6">
-          <div className="h-20 w-20 rounded-3xl bg-primary text-white flex items-center justify-center font-bold text-3xl shadow-lg shadow-primary/20">
+      <div className="bg-card text-card-foreground rounded-3xl border border-border p-8 space-y-6 shadow-xs">
+        <div className="flex items-center gap-5 border-b border-border pb-6">
+          <div className="h-20 w-20 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-3xl shadow-lg shadow-primary/20">
             {user?.name ? user.name[0] : "U"}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-900">{user?.name}</h2>
+            <h2 className="text-xl font-bold text-foreground">{user?.name}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className="bg-primary/10 text-primary text-xs font-extrabold px-3 py-0.5 rounded-full uppercase">
                 {user?.role}
               </span>
-              <span className="bg-emerald-50 text-emerald-600 text-xs font-bold px-3 py-0.5 rounded-full uppercase border border-emerald-200">
+              <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-3 py-0.5 rounded-full uppercase border border-emerald-500/30">
                 {user?.status}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-slate-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-foreground">
           <div className="space-y-1">
-            <p className="text-xs text-slate-400 font-bold uppercase">Email Address</p>
+            <p className="text-xs text-muted-foreground font-bold uppercase">Email Address</p>
             <div className="flex items-center gap-2 font-semibold">
               <Mail className="h-4 w-4 text-primary" />
               <span>{user?.email}</span>
@@ -52,7 +52,7 @@ export default function MyProfilePage() {
           </div>
 
           <div className="space-y-1">
-            <p className="text-xs text-slate-400 font-bold uppercase">Contact Number</p>
+            <p className="text-xs text-muted-foreground font-bold uppercase">Contact Number</p>
             <div className="flex items-center gap-2 font-semibold">
               <Phone className="h-4 w-4 text-primary" />
               <span>{user?.contactNumber || "Not provided"}</span>
@@ -60,7 +60,7 @@ export default function MyProfilePage() {
           </div>
 
           <div className="space-y-1">
-            <p className="text-xs text-slate-400 font-bold uppercase">Address</p>
+            <p className="text-xs text-muted-foreground font-bold uppercase">Address</p>
             <div className="flex items-center gap-2 font-semibold">
               <MapPin className="h-4 w-4 text-primary" />
               <span>{user?.address || "Not provided"}</span>
@@ -68,8 +68,8 @@ export default function MyProfilePage() {
           </div>
 
           <div className="space-y-1">
-            <p className="text-xs text-slate-400 font-bold uppercase">Email Verification</p>
-            <div className="flex items-center gap-2 font-semibold text-emerald-600">
+            <p className="text-xs text-muted-foreground font-bold uppercase">Email Verification</p>
+            <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-4 w-4" />
               <span>{user?.emailVerified ? "Verified" : "Pending Verification"}</span>
             </div>

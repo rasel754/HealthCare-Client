@@ -100,8 +100,8 @@ export default function PatientDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Global Section Controls Bar */}
-      <div className="flex items-center justify-between bg-white border border-slate-200/80 rounded-2xl px-5 py-3 shadow-xs">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+      <div className="flex items-center justify-between bg-card text-card-foreground border border-border rounded-2xl px-5 py-3 shadow-xs">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Activity className="h-4 w-4 text-primary" />
           <span>Dashboard Overview</span>
         </div>
@@ -110,7 +110,7 @@ export default function PatientDashboardPage() {
             variant="outline"
             size="sm"
             onClick={allCollapsed ? expandAll : collapseAll}
-            className="h-8 text-xs gap-1.5 rounded-xl border-slate-200 hover:bg-slate-50 font-medium"
+            className="h-8 text-xs gap-1.5 rounded-xl border-border hover:bg-accent font-medium"
           >
             {allCollapsed ? (
               <>
@@ -119,7 +119,7 @@ export default function PatientDashboardPage() {
               </>
             ) : (
               <>
-                <ChevronsDownUp className="h-3.5 w-3.5 text-slate-500" />
+                <ChevronsDownUp className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>Collapse All</span>
               </>
             )}
@@ -128,7 +128,7 @@ export default function PatientDashboardPage() {
       </div>
 
       {/* 1. Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl transition-all">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl transition-all border border-border/30">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary-foreground text-xs font-bold uppercase">
@@ -171,11 +171,11 @@ export default function PatientDashboardPage() {
       </div>
 
       {/* 2. Stats Section */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs transition-all">
+      <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 shadow-xs transition-all">
         <div className="flex items-center justify-between">
           <button
             onClick={() => toggleSection("stats")}
-            className="flex items-center gap-2.5 text-slate-900 font-bold text-lg hover:text-primary transition-colors text-left focus:outline-none"
+            className="flex items-center gap-2.5 text-foreground font-bold text-lg hover:text-primary transition-colors text-left focus:outline-none"
           >
             <BarChart3 className="h-5 w-5 text-primary" />
             <span>Key Metrics & Overview</span>
@@ -184,7 +184,7 @@ export default function PatientDashboardPage() {
             variant="ghost"
             size="sm"
             onClick={() => toggleSection("stats")}
-            className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-9 w-9 p-0 rounded-full"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent h-9 w-9 p-0 rounded-full"
             aria-label={openSections.stats ? "Collapse Key Metrics" : "Expand Key Metrics"}
           >
             {openSections.stats ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -194,33 +194,33 @@ export default function PatientDashboardPage() {
         <div className={`grid transition-all duration-300 ease-in-out ${openSections.stats ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
           <div className="overflow-hidden">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 flex items-center gap-4 hover:border-slate-300 transition-colors">
-                <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl">
+              <div className="bg-accent/40 p-6 rounded-2xl border border-border flex items-center gap-4 hover:border-primary/40 transition-colors">
+                <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl">
                   <Calendar className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Total Appointments</p>
-                  <p className="text-2xl font-extrabold text-slate-900">{stats.appointmentCount || 0}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Total Appointments</p>
+                  <p className="text-2xl font-extrabold text-foreground">{stats.appointmentCount || 0}</p>
                 </div>
               </div>
 
-              <div className="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 flex items-center gap-4 hover:border-slate-300 transition-colors">
-                <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl">
+              <div className="bg-accent/40 p-6 rounded-2xl border border-border flex items-center gap-4 hover:border-primary/40 transition-colors">
+                <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xl">
                   <FileText className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Prescriptions Issued</p>
-                  <p className="text-2xl font-extrabold text-slate-900">{stats.reviewCount || 0}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Prescriptions Issued</p>
+                  <p className="text-2xl font-extrabold text-foreground">{stats.reviewCount || 0}</p>
                 </div>
               </div>
 
-              <div className="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 flex items-center gap-4 hover:border-slate-300 transition-colors">
-                <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl">
+              <div className="bg-accent/40 p-6 rounded-2xl border border-border flex items-center gap-4 hover:border-primary/40 transition-colors">
+                <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xl">
                   <Star className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase">Reviews Given</p>
-                  <p className="text-2xl font-extrabold text-slate-900">{stats.reviewCount || 0}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Reviews Given</p>
+                  <p className="text-2xl font-extrabold text-foreground">{stats.reviewCount || 0}</p>
                 </div>
               </div>
             </div>
@@ -231,11 +231,11 @@ export default function PatientDashboardPage() {
       {/* 3 & 4. Appointment & Quick Actions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Next Scheduled Appointment */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-xs transition-all">
+        <div className="lg:col-span-2 bg-card text-card-foreground rounded-3xl border border-border p-6 space-y-4 shadow-xs transition-all">
           <div className="flex items-center justify-between">
             <button
               onClick={() => toggleSection("appointment")}
-              className="flex items-center gap-2 font-bold text-slate-900 text-lg hover:text-primary transition-colors text-left focus:outline-none"
+              className="flex items-center gap-2 font-bold text-foreground text-lg hover:text-primary transition-colors text-left focus:outline-none"
             >
               <Calendar className="h-5 w-5 text-primary" />
               <span>Next Scheduled Appointment</span>
@@ -248,7 +248,7 @@ export default function PatientDashboardPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => toggleSection("appointment")}
-                className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-9 w-9 p-0 rounded-full"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent h-9 w-9 p-0 rounded-full"
                 aria-label={openSections.appointment ? "Collapse Next Scheduled Appointment" : "Expand Next Scheduled Appointment"}
               >
                 {openSections.appointment ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -260,33 +260,33 @@ export default function PatientDashboardPage() {
             <div className="overflow-hidden">
               <div className="pt-2">
                 {upcomingAppointment ? (
-                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+                  <div className="bg-accent/40 border border-border rounded-2xl p-5 space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="font-bold text-slate-900 text-base">{upcomingAppointment.doctor?.name || "Dr. Assigned"}</h4>
-                        <p className="text-xs text-slate-500 font-medium">{upcomingAppointment.doctor?.designation || "Specialist Doctor"}</p>
+                        <h4 className="font-bold text-foreground text-base">{upcomingAppointment.doctor?.name || "Dr. Assigned"}</h4>
+                        <p className="text-xs text-muted-foreground font-medium">{upcomingAppointment.doctor?.designation || "Specialist Doctor"}</p>
                       </div>
-                      <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full uppercase">
+                      <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold px-3 py-1 rounded-full uppercase">
                         {upcomingAppointment.status}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-xs text-slate-600 border-t border-slate-200 pt-3">
+                    <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground border-t border-border pt-3">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-primary" />
                         <span>{upcomingAppointment.schedule?.startDate} ({upcomingAppointment.schedule?.startTime})</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Video className="h-4 w-4 text-emerald-600" />
-                        <span className="font-semibold text-slate-800">Video Room Active</span>
+                        <Video className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="font-semibold text-foreground">Video Room Active</span>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
-                    <Calendar className="h-10 w-10 text-slate-300 mx-auto" />
-                    <p className="text-sm font-semibold text-slate-700">No Upcoming Appointments</p>
-                    <p className="text-xs text-slate-400">Book a consultation with a specialist doctor anytime.</p>
+                  <div className="p-8 text-center bg-accent/30 rounded-2xl border border-dashed border-border space-y-3">
+                    <Calendar className="h-10 w-10 text-muted-foreground mx-auto" />
+                    <p className="text-sm font-semibold text-foreground">No Upcoming Appointments</p>
+                    <p className="text-xs text-muted-foreground">Book a consultation with a specialist doctor anytime.</p>
                     <Link href="/consultation">
                       <Button size="sm" className="rounded-xl mt-2">Book Doctor</Button>
                     </Link>
@@ -298,11 +298,11 @@ export default function PatientDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-xs transition-all">
+        <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 space-y-4 shadow-xs transition-all">
           <div className="flex items-center justify-between">
             <button
               onClick={() => toggleSection("quickActions")}
-              className="flex items-center gap-2 font-bold text-slate-900 text-lg hover:text-primary transition-colors text-left focus:outline-none"
+              className="flex items-center gap-2 font-bold text-foreground text-lg hover:text-primary transition-colors text-left focus:outline-none"
             >
               <Zap className="h-5 w-5 text-amber-500" />
               <span>Quick Actions</span>
@@ -311,7 +311,7 @@ export default function PatientDashboardPage() {
               variant="ghost"
               size="sm"
               onClick={() => toggleSection("quickActions")}
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-9 w-9 p-0 rounded-full"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent h-9 w-9 p-0 rounded-full"
               aria-label={openSections.quickActions ? "Collapse Quick Actions" : "Expand Quick Actions"}
             >
               {openSections.quickActions ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -323,19 +323,19 @@ export default function PatientDashboardPage() {
               <div className="space-y-2 pt-2">
                 <Link
                   href="/dashboard/my-appointments"
-                  className="block p-3.5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors text-xs font-bold text-slate-800"
+                  className="block p-3.5 rounded-2xl border border-border bg-accent/40 hover:bg-accent transition-colors text-xs font-bold text-foreground"
                 >
                   📅 Manage My Appointments
                 </Link>
                 <Link
                   href="/dashboard/my-prescriptions"
-                  className="block p-3.5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors text-xs font-bold text-slate-800"
+                  className="block p-3.5 rounded-2xl border border-border bg-accent/40 hover:bg-accent transition-colors text-xs font-bold text-foreground"
                 >
                   💊 View Issued Prescriptions
                 </Link>
                 <Link
                   href="/dashboard/health-record"
-                  className="block p-3.5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors text-xs font-bold text-slate-800"
+                  className="block p-3.5 rounded-2xl border border-border bg-accent/40 hover:bg-accent transition-colors text-xs font-bold text-foreground"
                 >
                   📋 Update Health Profile & Reports
                 </Link>
