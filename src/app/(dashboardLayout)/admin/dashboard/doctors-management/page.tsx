@@ -15,10 +15,12 @@ import { Gender } from "@/src/types/auth.type";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
+import SearchAndFilterBar from "@/src/components/shared/SearchAndFilterBar";
+import CardGrid from "@/src/components/shared/CardGrid";
+import Pagination from "@/src/components/shared/Pagination";
 import {
   Stethoscope,
   Plus,
-  Search,
   Trash2,
   Edit,
   X,
@@ -28,9 +30,6 @@ import {
   Star,
   Building2,
   Mail,
-  RotateCcw,
-  ChevronLeft,
-  ChevronRight,
   UserCheck,
   Hash,
   BadgeCheck,
@@ -350,6 +349,38 @@ function DoctorsManagementContent() {
     }
   };
 
+  const filtersConfig = [
+    {
+      id: "gender",
+      value: selectedGender,
+      placeholder: "All Genders",
+      options: [
+        { label: "Male Doctor", value: Gender.MALE },
+        { label: "Female Doctor", value: Gender.FEMALE },
+      ],
+      onChange: handleGenderChange,
+    },
+    {
+      id: "feeRange",
+      value: feeRange,
+      placeholder: "All Fee Ranges",
+      options: [
+        { label: "Under $50", value: "under-50" },
+        { label: "$50 - $100", value: "50-100" },
+        { label: "$100 - $200", value: "100-200" },
+        { label: "Above $200", value: "200-plus" },
+      ],
+      onChange: handleFeeRangeChange,
+    },
+    {
+      id: "specialty",
+      value: selectedSpecialty,
+      placeholder: "All Specialties",
+      options: specialties.map((s) => ({ label: s.title, value: s.id })),
+      onChange: handleSpecialtyChange,
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -374,253 +405,135 @@ function DoctorsManagementContent() {
         </Button>
       </div>
 
-      {/* Search & Filters Bar */}
-      <div className="bg-card text-card-foreground p-4 sm:p-5 rounded-3xl border border-border shadow-xs space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by doctor name or registration..."
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 h-10 rounded-xl bg-background text-foreground border-input text-xs"
-            />
-          </div>
+      {/* Reusable Search & Filters Bar */}
+      <SearchAndFilterBar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Search by doctor name or registration..."
+        filters={filtersConfig}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={Boolean(searchTerm || selectedGender || selectedSpecialty || feeRange)}
+      />
 
-          {/* Gender Filter */}
-          <div>
-            <select
-              value={selectedGender}
-              onChange={(e) => handleGenderChange(e.target.value)}
-              className="w-full h-10 px-3 bg-background border border-input rounded-xl text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">All Genders</option>
-              <option value={Gender.MALE}>Male Doctor</option>
-              <option value={Gender.FEMALE}>Female Doctor</option>
-            </select>
-          </div>
-
-          {/* Fee Range Filter */}
-          <div>
-            <select
-              value={feeRange}
-              onChange={(e) => handleFeeRangeChange(e.target.value)}
-              className="w-full h-10 px-3 bg-background border border-input rounded-xl text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">All Fee Ranges</option>
-              <option value="under-50">Under $50</option>
-              <option value="50-100">$50 - $100</option>
-              <option value="100-200">$100 - $200</option>
-              <option value="200-plus">Above $200</option>
-            </select>
-          </div>
-
-          {/* Specialties Filter */}
-          <div>
-            <select
-              value={selectedSpecialty}
-              onChange={(e) => handleSpecialtyChange(e.target.value)}
-              className="w-full h-10 px-3 bg-background border border-input rounded-xl text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">All Specialties</option>
-              {specialties.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Clear Filters Row */}
-        {(searchTerm || selectedGender || selectedSpecialty || feeRange) && (
-          <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
-            <span className="text-muted-foreground font-medium">Active filters applied</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearFilters}
-              className="h-8 text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 gap-1.5 rounded-xl font-bold"
-            >
-              <RotateCcw className="h-3.5 w-3.5" /> Clear Filters
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Doctor Cards */}
-      {isLoading ? (
-        <div className="py-16 flex flex-col items-center justify-center gap-3">
-          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-muted-foreground text-xs font-medium">Loading registered doctor accounts...</p>
-        </div>
-      ) : doctors.length === 0 ? (
-        <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
-          <Stethoscope className="h-12 w-12 text-muted-foreground mx-auto" />
-          <h3 className="text-base font-bold text-foreground">No Doctors Found</h3>
-          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            No doctors match your filter criteria or search parameters. Try adjusting or clearing filters.
-          </p>
-          {(searchTerm || selectedGender || selectedSpecialty || feeRange) && (
-            <Button variant="outline" onClick={handleClearFilters} className="rounded-xl gap-2 text-xs">
-              <RotateCcw className="h-3.5 w-3.5" /> Clear Filters
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {doctors.map((doc) => {
-            const docSpecs = getDoctorSpecialties(doc);
-            return (
-              <div
-                key={doc.id}
-                className="bg-card text-card-foreground rounded-3xl border border-border p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 space-y-5"
-              >
-                <div className="space-y-4">
-                  {/* Doctor Profile Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl shrink-0 overflow-hidden shadow-xs">
-                        {doc.profilePhoto ? (
-                          <img src={doc.profilePhoto} alt={doc.name} className="h-full w-full object-cover" />
-                        ) : (
-                          doc.name[0]
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-foreground text-base leading-snug">{doc.name}</h3>
-                        <p className="text-xs text-primary font-semibold">{doc.designation}</p>
-                        <p className="text-[11px] text-muted-foreground font-medium">{doc.qualification}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => openEditModal(doc)}
-                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-colors"
-                        title="Edit Doctor Profile"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => deleteDoctorMutation.mutate(doc.id)}
-                        className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
-                        title="Delete Doctor Account"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Specialties List */}
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Specialties</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {docSpecs.length === 0 ? (
-                        <span className="text-[11px] text-muted-foreground italic">General Medicine</span>
+      {/* Reusable Card Grid Component */}
+      <CardGrid
+        items={doctors}
+        keyExtractor={(doc) => doc.id}
+        isLoading={isLoading}
+        loadingMessage="Loading registered doctor accounts..."
+        emptyTitle="No Doctors Found"
+        emptyDescription="No doctors match your filter criteria or search parameters. Try adjusting or clearing filters."
+        emptyIcon={<Stethoscope className="h-12 w-12 text-muted-foreground mx-auto" />}
+        hasActiveFilters={Boolean(searchTerm || selectedGender || selectedSpecialty || feeRange)}
+        onClearFilters={handleClearFilters}
+        renderCard={(doc) => {
+          const docSpecs = getDoctorSpecialties(doc);
+          return (
+            <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 space-y-5 h-full">
+              <div className="space-y-4">
+                {/* Doctor Profile Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl shrink-0 overflow-hidden shadow-xs">
+                      {doc.profilePhoto ? (
+                        <img src={doc.profilePhoto} alt={doc.name} className="h-full w-full object-cover" />
                       ) : (
-                        docSpecs.map((s, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2.5 py-0.5 bg-primary/10 text-primary text-[11px] font-bold rounded-lg border border-primary/20"
-                          >
-                            {s.title}
-                          </span>
-                        ))
+                        doc.name[0]
                       )}
                     </div>
+                    <div>
+                      <h3 className="font-bold text-foreground text-base leading-snug">{doc.name}</h3>
+                      <p className="text-xs text-primary font-semibold">{doc.designation}</p>
+                      <p className="text-[11px] text-muted-foreground font-medium">{doc.qualification}</p>
+                    </div>
                   </div>
 
-                  {/* Stats & Contact Card */}
-                  <div className="bg-accent/40 border border-border p-3.5 rounded-2xl space-y-2 text-xs text-foreground">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
-                        <Award className="h-3.5 w-3.5 text-emerald-500" />
-                        <span>{doc.experience || 0} Years Exp.</span>
-                      </div>
-                      <div className="flex items-center gap-1 font-bold text-amber-500">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                        <span>{doc.averageRating ? doc.averageRating.toFixed(1) : "5.0"}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-1 border-t border-border/50 text-muted-foreground">
-                      <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                      <span className="font-semibold text-foreground">{doc.contactNumber || "N/A"}</span>
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEditModal(doc)}
+                      className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-colors"
+                      title="Edit Doctor Profile"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => deleteDoctorMutation.mutate(doc.id)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
+                      title="Delete Doctor Account"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
 
-                {/* Footer: Fee & View More Modal Trigger */}
-                <div className="border-t border-border pt-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Consultation Fee</p>
-                    <p className="text-xl font-extrabold text-foreground">${doc.appointmentFee}</p>
+                {/* Specialties List */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Specialties</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {docSpecs.length === 0 ? (
+                      <span className="text-[11px] text-muted-foreground italic">General Medicine</span>
+                    ) : (
+                      docSpecs.map((s, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-0.5 bg-primary/10 text-primary text-[11px] font-bold rounded-lg border border-primary/20"
+                        >
+                          {s.title}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats & Contact Card */}
+                <div className="bg-accent/40 border border-border p-3.5 rounded-2xl space-y-2 text-xs text-foreground">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
+                      <Award className="h-3.5 w-3.5 text-emerald-500" />
+                      <span>{doc.experience || 0} Years Exp.</span>
+                    </div>
+                    <div className="flex items-center gap-1 font-bold text-amber-500">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <span>{doc.averageRating ? doc.averageRating.toFixed(1) : "5.0"}</span>
+                    </div>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    onClick={() => setViewingDoctor(doc)}
-                    className="rounded-xl gap-1.5 text-xs font-semibold px-4 h-10 shadow-2xs hover:bg-primary hover:text-primary-foreground transition-all"
-                  >
-                    <Eye className="h-3.5 w-3.5" /> View More
-                  </Button>
+                  <div className="flex items-center gap-2 pt-1 border-t border-border/50 text-muted-foreground">
+                    <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="font-semibold text-foreground">{doc.contactNumber || "N/A"}</span>
+                  </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
 
-      {/* Pagination Controls */}
-      {doctors.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border">
-          <p className="text-xs text-muted-foreground">
-            Showing <span className="font-bold text-foreground">{Math.min((page - 1) * limit + 1, totalCount)}</span> to{" "}
-            <span className="font-bold text-foreground">{Math.min(page * limit, totalCount)}</span> of{" "}
-            <span className="font-bold text-foreground">{totalCount}</span> doctors
-          </p>
+              {/* Footer: Fee & View More Modal Trigger */}
+              <div className="border-t border-border pt-4 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Consultation Fee</p>
+                  <p className="text-xl font-extrabold text-foreground">${doc.appointmentFee}</p>
+                </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => handlePageChange(Math.max(page - 1, 1))}
-              className="h-9 px-3 rounded-xl gap-1 text-xs"
-            >
-              <ChevronLeft className="h-4 w-4" /> Previous
-            </Button>
-
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePageChange(p)}
-                  className={`h-9 w-9 rounded-xl text-xs font-bold transition-all ${
-                    p === page
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-background text-foreground border border-input hover:bg-accent"
-                  }`}
+                <Button
+                  variant="outline"
+                  onClick={() => setViewingDoctor(doc)}
+                  className="rounded-xl gap-1.5 text-xs font-semibold px-4 h-10 shadow-2xs hover:bg-primary hover:text-primary-foreground transition-all"
                 >
-                  {p}
-                </button>
-              ))}
+                  <Eye className="h-3.5 w-3.5" /> View More
+                </Button>
+              </div>
             </div>
+          );
+        }}
+      />
 
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => handlePageChange(Math.min(page + 1, totalPages))}
-              className="h-9 px-3 rounded-xl gap-1 text-xs"
-            >
-              Next <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Reusable Pagination Component */}
+      <Pagination
+        page={page}
+        limit={limit}
+        totalCount={totalCount}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        itemLabel="doctors"
+      />
 
       {/* Extended Details Modal (View More) */}
       {viewingDoctor && (
