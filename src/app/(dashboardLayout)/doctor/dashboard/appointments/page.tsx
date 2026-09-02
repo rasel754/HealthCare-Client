@@ -61,36 +61,36 @@ export default function DoctorAppointmentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Patient Consultation Appointments</h1>
-        <p className="text-xs text-slate-500 mt-1">Manage appointment statuses, initiate video calls, and issue prescriptions</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Patient Consultation Appointments</h1>
+        <p className="text-xs text-muted-foreground mt-1">Manage appointment statuses, initiate video calls, and issue prescriptions</p>
       </div>
 
       {isLoading ? (
-        <div className="py-16 text-center text-xs text-slate-500">Loading patient bookings...</div>
+        <div className="py-16 text-center text-xs text-muted-foreground">Loading patient bookings...</div>
       ) : appointments.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3 shadow-xs">
-          <Calendar className="h-12 w-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No Patient Appointments</h3>
-          <p className="text-xs text-slate-400">Assigned patient appointments will appear here.</p>
+        <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
+          <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h3 className="text-base font-bold text-foreground">No Patient Appointments</h3>
+          <p className="text-xs text-muted-foreground">Assigned patient appointments will appear here.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {appointments.map((app) => (
-            <div key={app.id} className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-xs">
+            <div key={app.id} className="bg-card text-card-foreground rounded-2xl border border-border p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-xs">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-blue-100 text-blue-700">
+                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                     {app.status}
                   </span>
-                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-emerald-50 text-emerald-600 border border-emerald-200">
+                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                     Payment: {app.paymentStatus}
                   </span>
                 </div>
 
-                <h3 className="font-bold text-slate-900 text-lg">{app.patient?.name || "Patient"}</h3>
-                <p className="text-xs text-slate-500">Contact: {app.patient?.contactNumber || "N/A"} • Email: {app.patient?.email}</p>
+                <h3 className="font-bold text-foreground text-lg">{app.patient?.name || "Patient"}</h3>
+                <p className="text-xs text-muted-foreground">Contact: {app.patient?.contactNumber || "N/A"} • Email: {app.patient?.email}</p>
 
-                <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
                   <div className="flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5 text-primary" />
                     <span>{app.schedule?.startDate} ({app.schedule?.startTime} - {app.schedule?.endTime})</span>
@@ -99,7 +99,7 @@ export default function DoctorAppointmentsPage() {
               </div>
 
               {/* Doctor Actions */}
-              <div className="flex flex-wrap items-center gap-2 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+              <div className="flex flex-wrap items-center gap-2 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
                 {app.status === AppointmentStatus.SCHEDULED && (
                   <Button
                     size="sm"
@@ -125,7 +125,7 @@ export default function DoctorAppointmentsPage() {
                     href={`https://meet.jit.si/${app.videoCallingId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3.5 py-1.5 bg-primary text-white text-xs font-semibold rounded-xl flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl flex items-center gap-1.5"
                   >
                     <Video className="h-4 w-4" /> Video Call
                   </a>
@@ -147,39 +147,40 @@ export default function DoctorAppointmentsPage() {
 
       {/* Prescription Issue Modal */}
       {selectedPrescriptionAppointment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-card text-card-foreground border border-border w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-lg">Issue Prescription for {selectedPrescriptionAppointment.patient?.name}</h3>
+              <h3 className="font-bold text-foreground text-lg">Issue Prescription for {selectedPrescriptionAppointment.patient?.name}</h3>
               <button onClick={() => setSelectedPrescriptionAppointment(null)}>
-                <X className="h-5 w-5 text-slate-400" />
+                <X className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
               </button>
             </div>
 
             {prescriptionMsg && (
-              <div className="p-3 bg-slate-100 rounded-xl text-xs text-slate-700">{prescriptionMsg}</div>
+              <div className="p-3 bg-accent text-accent-foreground rounded-xl text-xs">{prescriptionMsg}</div>
             )}
 
             <form onSubmit={handlePrescriptionSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Prescription Instructions & Medication Dosage</label>
+                <label className="text-xs font-bold text-foreground block mb-1">Prescription Instructions & Medication Dosage</label>
                 <Textarea
-                  placeholder="e.g. Tab Paracetamol 500mg 1+0+1 after meal for 5 days..."
+                  placeholder="e.g. Tab Paracetamol 500mg (1+0+1 after meal for 5 days)..."
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
-                  className="rounded-xl"
+                  className="rounded-xl bg-background text-foreground border-input"
                   rows={4}
                   required
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Follow-Up Date (Optional)</label>
+                <label className="text-xs font-bold text-foreground block mb-1">Follow-Up Date (Optional)</label>
                 <Input
                   type="date"
+                  placeholder="Select follow-up date..."
                   value={followUpDate}
                   onChange={(e) => setFollowUpDate(e.target.value)}
-                  className="rounded-xl"
+                  className="rounded-xl bg-background text-foreground border-input"
                 />
               </div>
 

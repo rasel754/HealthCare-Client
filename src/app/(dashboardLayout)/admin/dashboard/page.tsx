@@ -44,71 +44,71 @@ export default function AdminDashboardPage() {
 
       {/* System Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold mb-3">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs">
+          <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold mb-3">
             <Calendar className="h-5 w-5" />
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase">Appointments</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{stats.appointmentCount || 0}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase">Appointments</p>
+          <p className="text-2xl font-extrabold text-foreground mt-1">{stats.appointmentCount || 0}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold mb-3">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs">
+          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-3">
             <Stethoscope className="h-5 w-5" />
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase">Total Doctors</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{stats.doctorCount || 0}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase">Total Doctors</p>
+          <p className="text-2xl font-extrabold text-foreground mt-1">{stats.doctorCount || 0}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="h-10 w-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold mb-3">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs">
+          <div className="h-10 w-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold mb-3">
             <Users className="h-5 w-5" />
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase">Total Patients</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{stats.patientCount || 0}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase">Total Patients</p>
+          <p className="text-2xl font-extrabold text-foreground mt-1">{stats.patientCount || 0}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold mb-3">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs">
+          <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold mb-3">
             <Activity className="h-5 w-5" />
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase">Total Users</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{stats.userCount || 0}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase">Total Users</p>
+          <p className="text-2xl font-extrabold text-foreground mt-1">{stats.userCount || 0}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="h-10 w-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold mb-3">
+        <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs">
+          <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold mb-3">
             <DollarSign className="h-5 w-5" />
           </div>
-          <p className="text-xs font-bold text-slate-400 uppercase">Total Revenue</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">${stats.totalRevenue || 0}</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase">Total Revenue</p>
+          <p className="text-2xl font-extrabold text-foreground mt-1">${stats.totalRevenue || 0}</p>
         </div>
       </div>
 
       {/* Admin Modules Quick Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/admin/dashboard/doctors-management" className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all space-y-3">
-          <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+        <Link href="/admin/dashboard/doctors-management" className="bg-card text-card-foreground p-6 rounded-3xl border border-border hover:shadow-lg hover:border-primary/40 transition-all space-y-3">
+          <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
             <Stethoscope className="h-6 w-6" />
           </div>
-          <h3 className="font-bold text-slate-900 text-lg">Doctors Management</h3>
-          <p className="text-xs text-slate-500">Create new doctor accounts, assign specialty designations, update credentials, or soft-delete accounts.</p>
+          <h3 className="font-bold text-foreground text-lg">Doctors Management</h3>
+          <p className="text-xs text-muted-foreground">Create new doctor accounts, assign specialty designations, update credentials, or soft-delete accounts.</p>
         </Link>
 
-        <Link href="/admin/dashboard/specialties-management" className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all space-y-3">
-          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+        <Link href="/admin/dashboard/specialties-management" className="bg-card text-card-foreground p-6 rounded-3xl border border-border hover:shadow-lg hover:border-primary/40 transition-all space-y-3">
+          <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
             <Layers className="h-6 w-6" />
           </div>
-          <h3 className="font-bold text-slate-900 text-lg">Medical Specialties</h3>
-          <p className="text-xs text-slate-500">Create medical specialty categories with icon image uploads for patient search filtering.</p>
+          <h3 className="font-bold text-foreground text-lg">Medical Specialties</h3>
+          <p className="text-xs text-muted-foreground">Create medical specialty categories with icon image uploads for patient search filtering.</p>
         </Link>
 
-        <Link href="/admin/dashboard/schedules-management" className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all space-y-3">
-          <div className="h-12 w-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+        <Link href="/admin/dashboard/schedules-management" className="bg-card text-card-foreground p-6 rounded-3xl border border-border hover:shadow-lg hover:border-primary/40 transition-all space-y-3">
+          <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
             <Clock className="h-6 w-6" />
           </div>
-          <h3 className="font-bold text-slate-900 text-lg">Schedule Time Slots</h3>
-          <p className="text-xs text-slate-500">Generate date range & time interval schedule slots available for doctor assignments.</p>
+          <h3 className="font-bold text-foreground text-lg">Schedule Time Slots</h3>
+          <p className="text-xs text-muted-foreground">Generate date range & time interval schedule slots available for doctor assignments.</p>
         </Link>
       </div>
     </div>

@@ -120,38 +120,38 @@ export default function SpecialtiesManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-slate-500">Loading specialties...</div>
+        <div className="py-12 text-center text-xs text-muted-foreground">Loading specialties...</div>
       ) : specialties.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3 shadow-xs">
-          <Layers className="h-12 w-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No Specialties Found</h3>
-          <p className="text-xs text-slate-400">Click &apos;Create Specialty&apos; above to add specialty categories.</p>
+        <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
+          <Layers className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h3 className="text-base font-bold text-foreground">No Specialties Found</h3>
+          <p className="text-xs text-muted-foreground">Click &apos;Create Specialty&apos; above to add specialty categories.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {specialties.map((s) => (
-            <div key={s.id} className="bg-white rounded-3xl border border-slate-200 p-6 flex items-start justify-between shadow-xs">
+            <div key={s.id} className="bg-card text-card-foreground rounded-3xl border border-border p-6 flex items-start justify-between shadow-xs">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xl overflow-hidden shrink-0">
                   {s.icon ? <img src={s.icon} alt={s.title} className="h-full w-full object-cover" /> : <Layers className="h-6 w-6" />}
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">{s.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{s.description || "No description provided."}</p>
+                  <h3 className="font-bold text-foreground text-base">{s.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.description || "No description provided."}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => openEditModal(s)}
-                  className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-colors"
                   title="Edit Specialty"
                 >
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => deleteSpecialtyMutation.mutate(s.id)}
-                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+                  className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
                   title="Delete Specialty"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -164,16 +164,16 @@ export default function SpecialtiesManagementPage() {
 
       {/* Add Specialty Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-card text-card-foreground border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-lg">Create Medical Specialty</h3>
+              <h3 className="font-bold text-foreground text-lg">Create Medical Specialty</h3>
               <button onClick={() => setIsAddModalOpen(false)}>
-                <X className="h-5 w-5 text-slate-400" />
+                <X className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
               </button>
             </div>
 
-            {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
+            {msg && <div className="p-3 bg-accent text-accent-foreground rounded-xl text-xs font-semibold">{msg}</div>}
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
@@ -181,10 +181,10 @@ export default function SpecialtiesManagementPage() {
                 <Input
                   id="title"
                   required
-                  placeholder="Cardiology, Neurology..."
+                  placeholder="e.g. Cardiology, Neurology, Pediatrics..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="rounded-xl mt-1"
+                  className="rounded-xl mt-1 bg-background text-foreground border-input"
                 />
               </div>
 
@@ -192,10 +192,10 @@ export default function SpecialtiesManagementPage() {
                 <Label htmlFor="desc">Description</Label>
                 <Textarea
                   id="desc"
-                  placeholder="Specialty overview..."
+                  placeholder="Describe medical focus and treatments..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="rounded-xl mt-1"
+                  className="rounded-xl mt-1 bg-background text-foreground border-input"
                   rows={3}
                 />
               </div>
@@ -207,7 +207,7 @@ export default function SpecialtiesManagementPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  className="rounded-xl mt-1"
+                  className="rounded-xl mt-1 bg-background text-foreground border-input"
                 />
               </div>
 
@@ -221,16 +221,16 @@ export default function SpecialtiesManagementPage() {
 
       {/* Edit Specialty Modal */}
       {editingSpecialty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-card text-card-foreground border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-lg">Edit Medical Specialty</h3>
+              <h3 className="font-bold text-foreground text-lg">Edit Medical Specialty</h3>
               <button onClick={() => setEditingSpecialty(null)}>
-                <X className="h-5 w-5 text-slate-400" />
+                <X className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
               </button>
             </div>
 
-            {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
+            {msg && <div className="p-3 bg-accent text-accent-foreground rounded-xl text-xs font-semibold">{msg}</div>}
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
@@ -238,9 +238,10 @@ export default function SpecialtiesManagementPage() {
                 <Input
                   id="editTitle"
                   required
+                  placeholder="Specialty title..."
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="rounded-xl mt-1"
+                  className="rounded-xl mt-1 bg-background text-foreground border-input"
                 />
               </div>
 
@@ -248,9 +249,10 @@ export default function SpecialtiesManagementPage() {
                 <Label htmlFor="editDesc">Description</Label>
                 <Textarea
                   id="editDesc"
+                  placeholder="Specialty description..."
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  className="rounded-xl mt-1"
+                  className="rounded-xl mt-1 bg-background text-foreground border-input"
                   rows={3}
                 />
               </div>
@@ -262,12 +264,12 @@ export default function SpecialtiesManagementPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setEditFile(e.target.files?.[0] || null)}
-                  className="rounded-xl mt-1"
+                  className="rounded-xl mt-1 bg-background text-foreground border-input"
                 />
               </div>
 
               <Button type="submit" disabled={updateSpecialtyMutation.isPending} className="w-full rounded-xl mt-2">
-                {updateSpecialtyMutation.isPending ? "Updating..." : "Update Specialty"}
+                {updateSpecialtyMutation.isPending ? "Updating..." : "Save Changes"}
               </Button>
             </form>
           </div>

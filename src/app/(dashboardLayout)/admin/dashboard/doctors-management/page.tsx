@@ -169,28 +169,28 @@ export default function DoctorsManagementPage() {
 
       {/* Search Input */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by doctor name or registration number..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 h-11 rounded-xl bg-white"
+          className="pl-10 h-11 rounded-xl bg-background text-foreground border-input"
         />
       </div>
 
       {/* Doctor Cards */}
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-slate-500">Loading doctor accounts...</div>
+        <div className="py-12 text-center text-xs text-muted-foreground">Loading doctor accounts...</div>
       ) : doctors.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3 shadow-xs">
-          <Stethoscope className="h-12 w-12 text-slate-300 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No Doctors Registered</h3>
-          <p className="text-xs text-slate-400">Click &apos;Add Doctor Account&apos; above to onboard specialist doctors.</p>
+        <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
+          <Stethoscope className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h3 className="text-base font-bold text-foreground">No Doctors Registered</h3>
+          <p className="text-xs text-muted-foreground">Click &apos;Add Doctor Account&apos; above to onboard specialist doctors.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {doctors.map((doc) => (
-            <div key={doc.id} className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between shadow-xs space-y-4">
+            <div key={doc.id} className="bg-card text-card-foreground rounded-3xl border border-border p-6 flex flex-col justify-between shadow-xs space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -198,7 +198,7 @@ export default function DoctorsManagementPage() {
                       {doc.name[0]}
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 text-base">{doc.name}</h3>
+                      <h3 className="font-bold text-foreground text-base">{doc.name}</h3>
                       <p className="text-xs text-primary font-semibold">{doc.designation}</p>
                     </div>
                   </div>
@@ -206,14 +206,14 @@ export default function DoctorsManagementPage() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openEditModal(doc)}
-                      className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-colors"
                       title="Edit Doctor Profile"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => deleteDoctorMutation.mutate(doc.id)}
-                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+                      className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
                       title="Delete Doctor Account"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -221,7 +221,7 @@ export default function DoctorsManagementPage() {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-2xl space-y-1 text-xs text-slate-600">
+                <div className="bg-accent/40 border border-border p-3 rounded-2xl space-y-1 text-xs text-foreground">
                   <p><strong>Email:</strong> {doc.email}</p>
                   <p><strong>Reg #:</strong> {doc.registrationNumber}</p>
                   <p><strong>Working Place:</strong> {doc.currentWorkingPlace}</p>
@@ -235,77 +235,77 @@ export default function DoctorsManagementPage() {
 
       {/* Add Doctor Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-card text-card-foreground border border-border w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-xl">Create Doctor Account</h3>
+              <h3 className="font-bold text-foreground text-xl">Create Doctor Account</h3>
               <button onClick={() => setIsAddModalOpen(false)}>
-                <X className="h-5 w-5 text-slate-400" />
+                <X className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
               </button>
             </div>
 
-            {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
+            {msg && <div className="p-3 bg-accent text-accent-foreground rounded-xl text-xs font-semibold">{msg}</div>}
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Doctor Name</Label>
-                  <Input required placeholder="Dr. Jane Smith" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Dr. Jane Smith" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Email Address</Label>
-                  <Input required type="email" placeholder="jane@healthcare.com" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required type="email" placeholder="jane@healthcare.com" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Password</Label>
-                  <Input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Contact Number</Label>
-                  <Input required placeholder="+8801700000000" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="+8801700000000" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Registration Number</Label>
-                  <Input required placeholder="REG-10928" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="REG-10928" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Qualification</Label>
-                  <Input required placeholder="MBBS, FCPS" value={qualification} onChange={(e) => setQualification(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="MBBS, FCPS" value={qualification} onChange={(e) => setQualification(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Designation</Label>
-                  <Input required placeholder="Consultant Cardiologist" value={designation} onChange={(e) => setDesignation(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Consultant Cardiologist" value={designation} onChange={(e) => setDesignation(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Current Working Place</Label>
-                  <Input required placeholder="Square Hospital" value={currentWorkingPlace} onChange={(e) => setCurrentWorkingPlace(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Square Hospital" value={currentWorkingPlace} onChange={(e) => setCurrentWorkingPlace(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label>Appointment Fee ($)</Label>
-                  <Input required type="number" value={appointmentFee} onChange={(e) => setAppointmentFee(Number(e.target.value))} className="rounded-xl mt-1" />
+                  <Input required type="number" placeholder="50" value={appointmentFee} onChange={(e) => setAppointmentFee(Number(e.target.value))} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Experience (Years)</Label>
-                  <Input required type="number" value={experience} onChange={(e) => setExperience(Number(e.target.value))} className="rounded-xl mt-1" />
+                  <Input required type="number" placeholder="8" value={experience} onChange={(e) => setExperience(Number(e.target.value))} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Gender</Label>
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value as Gender)}
-                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium mt-1"
+                    className="w-full h-10 px-3 border border-input bg-background text-foreground rounded-xl text-sm font-medium mt-1 focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value={Gender.MALE}>Male</option>
                     <option value={Gender.FEMALE}>Female</option>
@@ -324,7 +324,7 @@ export default function DoctorsManagementPage() {
                         type="button"
                         onClick={() => toggleSpecialtySelect(s.id)}
                         className={`p-2 rounded-xl border text-xs text-left transition-all ${
-                          isSelected ? "border-primary bg-primary/10 font-bold text-primary" : "border-slate-200 bg-white"
+                          isSelected ? "border-primary bg-primary/10 font-bold text-primary" : "border-border bg-card text-foreground hover:bg-accent"
                         }`}
                       >
                         {s.title}
@@ -344,66 +344,66 @@ export default function DoctorsManagementPage() {
 
       {/* Edit Doctor Modal */}
       {editingDoctor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-card text-card-foreground border border-border w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-xl">Edit Doctor Profile</h3>
+              <h3 className="font-bold text-foreground text-xl">Edit Doctor Profile</h3>
               <button onClick={() => setEditingDoctor(null)}>
-                <X className="h-5 w-5 text-slate-400" />
+                <X className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
               </button>
             </div>
 
-            {msg && <div className="p-3 bg-slate-100 rounded-xl text-xs font-semibold text-slate-700">{msg}</div>}
+            {msg && <div className="p-3 bg-accent text-accent-foreground rounded-xl text-xs font-semibold">{msg}</div>}
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Doctor Name</Label>
-                  <Input required value={editName} onChange={(e) => setEditName(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Doctor full name" value={editName} onChange={(e) => setEditName(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Contact Number</Label>
-                  <Input required value={editContact} onChange={(e) => setEditContact(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Contact phone number" value={editContact} onChange={(e) => setEditContact(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Registration Number</Label>
-                  <Input required value={editRegNum} onChange={(e) => setEditRegNum(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Registration number" value={editRegNum} onChange={(e) => setEditRegNum(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Qualification</Label>
-                  <Input required value={editQual} onChange={(e) => setEditQual(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Medical qualifications" value={editQual} onChange={(e) => setEditQual(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Designation</Label>
-                  <Input required value={editDesig} onChange={(e) => setEditDesig(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Designation" value={editDesig} onChange={(e) => setEditDesig(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Current Working Place</Label>
-                  <Input required value={editWorkPlace} onChange={(e) => setEditWorkPlace(e.target.value)} className="rounded-xl mt-1" />
+                  <Input required placeholder="Hospital / Workplace" value={editWorkPlace} onChange={(e) => setEditWorkPlace(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label>Appointment Fee ($)</Label>
-                  <Input required type="number" value={editFee} onChange={(e) => setEditFee(Number(e.target.value))} className="rounded-xl mt-1" />
+                  <Input required type="number" placeholder="Fee amount" value={editFee} onChange={(e) => setEditFee(Number(e.target.value))} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Experience (Years)</Label>
-                  <Input required type="number" value={editExp} onChange={(e) => setEditExp(Number(e.target.value))} className="rounded-xl mt-1" />
+                  <Input required type="number" placeholder="Years of experience" value={editExp} onChange={(e) => setEditExp(Number(e.target.value))} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
                   <Label>Gender</Label>
                   <select
                     value={editGender}
                     onChange={(e) => setEditGender(e.target.value as Gender)}
-                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm font-medium mt-1"
+                    className="w-full h-10 px-3 border border-input bg-background text-foreground rounded-xl text-sm font-medium mt-1 focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value={Gender.MALE}>Male</option>
                     <option value={Gender.FEMALE}>Female</option>
