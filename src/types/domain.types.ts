@@ -43,6 +43,15 @@ export interface IDoctor {
   specialties?: ISpecialty[] | string[];
   createdAt?: string;
   updatedAt?: string;
+  user?: {
+    id?: string;
+    email?: string;
+    status?: UserStatus;
+    role?: Role;
+    createdAt?: string;
+    updatedAt?: string;
+    [key: string]: any;
+  };
 }
 
 export interface IAdmin {
