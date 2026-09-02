@@ -10,6 +10,7 @@ import { getMyAppointmentsService } from "@/src/services/appointment.services";
 import { IDashboardStats, IAppointment } from "@/src/types/domain.types";
 import { Role } from "@/src/types/auth.type";
 import { Button } from "@/src/components/ui/button";
+import { AppointmentCharts } from "@/src/components/modules/dashboard/AppointmentCharts";
 import {
   Calendar,
   FileText,
@@ -85,9 +86,9 @@ export default function PatientDashboardPage() {
     queryFn: () => getDashboardStatsService(),
   });
 
-  const { data: appointmentsResponse } = useQuery({
-    queryKey: ["my-appointments"],
-    queryFn: () => getMyAppointmentsService({ limit: 5 }),
+  const { data: appointmentsResponse, isLoading: isAppointmentsLoading } = useQuery({
+    queryKey: ["patient-all-appointments"],
+    queryFn: () => getMyAppointmentsService(),
   });
 
   const stats = (statsResponse && "data" in statsResponse ? statsResponse.data : {}) as IDashboardStats;
@@ -170,8 +171,8 @@ export default function PatientDashboardPage() {
         </div>
       </div>
 
-      {/* 2. Stats Section */}
-      <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 shadow-xs transition-all">
+      {/* 2. Stats & Analytics Section */}
+      <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 shadow-xs transition-all space-y-6">
         <div className="flex items-center justify-between">
           <button
             onClick={() => toggleSection("stats")}
@@ -192,7 +193,7 @@ export default function PatientDashboardPage() {
         </div>
 
         <div className={`grid transition-all duration-300 ease-in-out ${openSections.stats ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="bg-accent/40 p-6 rounded-2xl border border-border flex items-center gap-4 hover:border-primary/40 transition-colors">
                 <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xl">
@@ -200,7 +201,7 @@ export default function PatientDashboardPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Total Appointments</p>
-                  <p className="text-2xl font-extrabold text-foreground">{stats.appointmentCount || 0}</p>
+                  <p className="text-2xl font-extrabold text-foreground">{stats.appointmentCount || appointments.length || 0}</p>
                 </div>
               </div>
 
@@ -224,9 +225,19 @@ export default function PatientDashboardPage() {
                 </div>
               </div>
             </div>
+
+            {/* Patient Scoped Pie & Bar Charts */}
+            <AppointmentCharts
+              appointments={appointments}
+              scopeTitle="My Appointment Analytics"
+              scopeSubtitle="Real-time distribution and timeline of your personal appointments"
+              badgeLabel="Patient Scoped View"
+              isLoading={isAppointmentsLoading}
+            />
           </div>
         </div>
       </div>
+
 
       {/* 3 & 4. Appointment & Quick Actions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

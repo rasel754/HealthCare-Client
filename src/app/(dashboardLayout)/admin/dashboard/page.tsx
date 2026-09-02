@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStatsService } from "@/src/services/stats.services";
-import { IDashboardStats } from "@/src/types/domain.types";
+import { getAllAppointmentsService } from "@/src/services/appointment.services";
+import { IDashboardStats, IAppointment } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
+import { AppointmentCharts } from "@/src/components/modules/dashboard/AppointmentCharts";
 import { Stethoscope, Users, Calendar, DollarSign, Activity, PlusCircle, ShieldCheck, Clock, Layers } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -13,7 +15,13 @@ export default function AdminDashboardPage() {
     queryFn: () => getDashboardStatsService(),
   });
 
+  const { data: appointmentsResponse, isLoading: isAppointmentsLoading } = useQuery({
+    queryKey: ["admin-all-appointments"],
+    queryFn: () => getAllAppointmentsService(),
+  });
+
   const stats = (statsResponse && "data" in statsResponse ? statsResponse.data : {}) as IDashboardStats;
+  const appointments = (appointmentsResponse && "data" in appointmentsResponse ? appointmentsResponse.data : []) as IAppointment[];
 
   return (
     <div className="space-y-8">
@@ -49,7 +57,7 @@ export default function AdminDashboardPage() {
             <Calendar className="h-5 w-5" />
           </div>
           <p className="text-xs font-bold text-muted-foreground uppercase">Appointments</p>
-          <p className="text-2xl font-extrabold text-foreground mt-1">{stats.appointmentCount || 0}</p>
+          <p className="text-2xl font-extrabold text-foreground mt-1">{stats.appointmentCount || appointments.length || 0}</p>
         </div>
 
         <div className="bg-card text-card-foreground p-6 rounded-2xl border border-border shadow-xs">
@@ -84,6 +92,15 @@ export default function AdminDashboardPage() {
           <p className="text-2xl font-extrabold text-foreground mt-1">${stats.totalRevenue || 0}</p>
         </div>
       </div>
+
+      {/* Role-Based System Wide Appointment Pie and Bar Charts */}
+      <AppointmentCharts
+        appointments={appointments}
+        scopeTitle="System-Wide Appointment Analytics"
+        scopeSubtitle="Aggregated real-time appointment status distribution & timeline across all doctors and patients"
+        badgeLabel="Admin & Super Admin System View"
+        isLoading={isAppointmentsLoading}
+      />
 
       {/* Admin Modules Quick Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

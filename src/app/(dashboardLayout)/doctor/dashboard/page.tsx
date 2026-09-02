@@ -6,6 +6,7 @@ import { getDashboardStatsService } from "@/src/services/stats.services";
 import { getMyAppointmentsService } from "@/src/services/appointment.services";
 import { IDashboardStats, IAppointment } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
+import { AppointmentCharts } from "@/src/components/modules/dashboard/AppointmentCharts";
 import { Calendar, Users, Star, DollarSign, Clock, ArrowRight, Video, FileText } from "lucide-react";
 
 export default function DoctorDashboardPage() {
@@ -14,13 +15,15 @@ export default function DoctorDashboardPage() {
     queryFn: () => getDashboardStatsService(),
   });
 
-  const { data: appointmentsResponse } = useQuery({
-    queryKey: ["doctor-appointments"],
-    queryFn: () => getMyAppointmentsService({ limit: 5 }),
+  const { data: appointmentsResponse, isLoading: isAppointmentsLoading } = useQuery({
+    queryKey: ["doctor-all-appointments"],
+    queryFn: () => getMyAppointmentsService(),
   });
 
   const stats = (statsResponse && "data" in statsResponse ? statsResponse.data : {}) as IDashboardStats;
   const appointments = (appointmentsResponse && "data" in appointmentsResponse ? appointmentsResponse.data : []) as IAppointment[];
+
+  const upcomingConsultations = appointments.slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -50,7 +53,7 @@ export default function DoctorDashboardPage() {
           </div>
           <div>
             <p className="text-xs font-bold text-muted-foreground uppercase">Appointments</p>
-            <p className="text-2xl font-extrabold text-foreground">{stats.appointmentCount || 0}</p>
+            <p className="text-2xl font-extrabold text-foreground">{stats.appointmentCount || appointments.length || 0}</p>
           </div>
         </div>
 
@@ -85,6 +88,15 @@ export default function DoctorDashboardPage() {
         </div>
       </div>
 
+      {/* Doctor Scoped Appointment Pie & Bar Charts */}
+      <AppointmentCharts
+        appointments={appointments}
+        scopeTitle="Doctor Appointments Analytics"
+        scopeSubtitle="Real-time distribution and timeline of your patient consultations"
+        badgeLabel="Doctor Scoped View"
+        isLoading={isAppointmentsLoading}
+      />
+
       {/* Doctor Appointments Queue */}
       <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 space-y-6 shadow-xs">
         <div className="flex items-center justify-between">
@@ -94,13 +106,13 @@ export default function DoctorDashboardPage() {
           </Link>
         </div>
 
-        {appointments.length === 0 ? (
+        {upcomingConsultations.length === 0 ? (
           <div className="p-8 text-center bg-accent/30 rounded-2xl border border-dashed border-border">
             <p className="text-xs text-muted-foreground">No active patient bookings queued.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {appointments.map((app) => (
+            {upcomingConsultations.map((app) => (
               <div key={app.id} className="p-4 rounded-2xl border border-border bg-accent/40 flex items-center justify-between gap-4">
                 <div>
                   <h4 className="font-bold text-foreground text-sm">{app.patient?.name || "Patient"}</h4>
