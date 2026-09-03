@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { getSchedulesService } from "@/src/services/schedule.services";
+import { getAllDoctorSchedulesService } from "@/src/services/schedule.services";
 import { bookAppointmentService, bookAppointmentWithPayLaterService } from "@/src/services/appointment.services";
-import { IDoctor, ISchedule } from "@/src/types/domain.types";
+import { IDoctor, IDoctorSchedule } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
 import { Calendar, Clock, CreditCard, DollarSign, CheckCircle2, AlertCircle, X, Stethoscope } from "lucide-react";
 
@@ -13,6 +13,28 @@ interface BookAppointmentModalProps {
   doctor: IDoctor;
   onClose: () => void;
 }
+
+const formatSlotDate = (startDateTime?: string) => {
+  if (!startDateTime) return "N/A";
+  return new Date(startDateTime).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const formatSlotTime = (startDateTime?: string, endDateTime?: string) => {
+  if (!startDateTime || !endDateTime) return "N/A";
+  const start = new Date(startDateTime).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const end = new Date(endDateTime).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${start} - ${end}`;
+};
 
 export default function BookAppointmentModal({ doctor, onClose }: BookAppointmentModalProps) {
   const router = useRouter();
@@ -22,13 +44,14 @@ export default function BookAppointmentModal({ doctor, onClose }: BookAppointmen
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Fetch available schedule slots
+  // Fetch available schedule slots specific to this doctor
   const { data: schedulesResponse, isLoading: loadingSchedules } = useQuery({
-    queryKey: ["schedules"],
-    queryFn: () => getSchedulesService({ limit: 50 }),
+    queryKey: ["doctor-schedules", doctor.id],
+    queryFn: () => getAllDoctorSchedulesService({ doctorId: doctor.id, isBooked: false, limit: 100 }),
+    enabled: Boolean(doctor?.id),
   });
 
-  const schedules = (schedulesResponse && "data" in schedulesResponse ? schedulesResponse.data : []) as ISchedule[];
+  const doctorSchedules = (schedulesResponse && "data" in schedulesResponse ? schedulesResponse.data : []) as IDoctorSchedule[];
 
   const bookPayNowMutation = useMutation({
     mutationFn: bookAppointmentService,
@@ -139,15 +162,17 @@ export default function BookAppointmentModal({ doctor, onClose }: BookAppointmen
 
             {loadingSchedules ? (
               <p className="text-xs text-muted-foreground">Loading schedule slots...</p>
-            ) : schedules.length === 0 ? (
+            ) : doctorSchedules.length === 0 ? (
               <p className="text-xs text-rose-600 dark:text-rose-400 bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">No active schedule slots available for this doctor.</p>
             ) : (
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-                {schedules.map((slot) => {
+                {doctorSchedules.map((ds) => {
+                  const slot = ds.schedule;
+                  if (!slot) return null;
                   const isSelected = selectedScheduleId === slot.id;
                   return (
                     <button
-                      key={slot.id}
+                      key={ds.scheduleId || slot.id}
                       type="button"
                       onClick={() => setSelectedScheduleId(slot.id)}
                       className={`p-3 rounded-xl border text-left text-xs transition-all ${
@@ -156,12 +181,12 @@ export default function BookAppointmentModal({ doctor, onClose }: BookAppointmen
                           : "border-border bg-card text-foreground hover:bg-accent"
                       }`}
                     >
-                      <div className="flex items-center gap-1 font-semibold">
-                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{slot.startDate}</span>
+                      <div className="flex items-center gap-1.5 font-semibold">
+                        <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span>{formatSlotDate(slot.startDateTime)}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-1">
-                        {slot.startTime} - {slot.endTime}
+                        {formatSlotTime(slot.startDateTime, slot.endDateTime)}
                       </p>
                     </button>
                   );

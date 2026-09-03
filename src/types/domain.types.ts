@@ -126,7 +126,11 @@ export interface ISchedule {
   endDate: string;
   startTime: string;
   endTime: string;
+  startDateTime?: string;
+  endDateTime?: string;
   isBooked?: boolean;
+  doctorSchedules?: IDoctorSchedule[];
+  appointments?: IAppointment[];
   createdAt?: string;
   updatedAt?: string;
 }

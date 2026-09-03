@@ -6,11 +6,33 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { getDoctorByIdService } from "@/src/services/doctor.services";
-import { getSchedulesService } from "@/src/services/schedule.services";
-import { IDoctor, ISchedule } from "@/src/types/domain.types";
+import { getAllDoctorSchedulesService } from "@/src/services/schedule.services";
+import { IDoctor, IDoctorSchedule } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
-import { Stethoscope, Calendar, Clock, MapPin, Award, Star, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Stethoscope, Calendar, Clock, MapPin, Award, ArrowLeft, ShieldCheck } from "lucide-react";
 import BookAppointmentModal from "@/src/components/modules/consultation/BookAppointmentModal";
+
+const formatSlotDate = (startDateTime?: string) => {
+  if (!startDateTime) return "N/A";
+  return new Date(startDateTime).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const formatSlotTime = (startDateTime?: string, endDateTime?: string) => {
+  if (!startDateTime || !endDateTime) return "N/A";
+  const start = new Date(startDateTime).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const end = new Date(endDateTime).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${start} - ${end}`;
+};
 
 export default function ConsultationDoctorByIdPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -22,12 +44,13 @@ export default function ConsultationDoctorByIdPage({ params }: { params: Promise
   });
 
   const { data: schedulesResponse } = useQuery({
-    queryKey: ["schedules"],
-    queryFn: () => getSchedulesService({ limit: 20 }),
+    queryKey: ["doctor-schedules", id],
+    queryFn: () => getAllDoctorSchedulesService({ doctorId: id, isBooked: false, limit: 100 }),
+    enabled: Boolean(id),
   });
 
   const doctor = (doctorResponse && "data" in doctorResponse ? doctorResponse.data : null) as IDoctor | null;
-  const schedules = (schedulesResponse && "data" in schedulesResponse ? schedulesResponse.data : []) as ISchedule[];
+  const doctorSchedules = (schedulesResponse && "data" in schedulesResponse ? schedulesResponse.data : []) as IDoctorSchedule[];
 
   if (loadingDoctor) {
     return (
@@ -154,22 +177,26 @@ export default function ConsultationDoctorByIdPage({ params }: { params: Promise
           </Button>
         </div>
 
-        {schedules.length === 0 ? (
-          <p className="text-xs text-slate-400">No active consultation schedule slots available at this moment.</p>
+        {doctorSchedules.length === 0 ? (
+          <p className="text-xs text-slate-400">No active consultation schedule slots assigned by this doctor at this moment.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {schedules.slice(0, 6).map((slot) => (
-              <div key={slot.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/70 space-y-1 text-xs">
-                <div className="flex items-center justify-between font-bold text-slate-900">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-primary" />
-                    <span>{slot.startDate}</span>
+            {doctorSchedules.slice(0, 6).map((ds) => {
+              const slot = ds.schedule;
+              if (!slot) return null;
+              return (
+                <div key={ds.scheduleId || slot.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/70 space-y-1 text-xs">
+                  <div className="flex items-center justify-between font-bold text-slate-900">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary" />
+                      <span>{formatSlotDate(slot.startDateTime)}</span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Open</span>
                   </div>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Open</span>
+                  <p className="text-slate-500 text-[11px]">{formatSlotTime(slot.startDateTime, slot.endDateTime)}</p>
                 </div>
-                <p className="text-slate-500 text-[11px]">{slot.startTime} - {slot.endTime}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

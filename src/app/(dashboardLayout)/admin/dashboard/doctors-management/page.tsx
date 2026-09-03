@@ -18,6 +18,7 @@ import { Label } from "@/src/components/ui/label";
 import SearchAndFilterBar from "@/src/components/shared/SearchAndFilterBar";
 import CardGrid from "@/src/components/shared/CardGrid";
 import Pagination from "@/src/components/shared/Pagination";
+import DeleteConfirmationModal from "@/src/components/shared/DeleteConfirmationModal";
 import {
   Stethoscope,
   Plus,
@@ -90,6 +91,7 @@ function DoctorsManagementContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<IDoctor | null>(null);
   const [viewingDoctor, setViewingDoctor] = useState<IDoctor | null>(null);
+  const [deletingDoctor, setDeletingDoctor] = useState<IDoctor | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   // Form State for creating doctor
@@ -277,7 +279,10 @@ function DoctorsManagementContent() {
 
   const deleteDoctorMutation = useMutation({
     mutationFn: (id: string) => deleteDoctorService(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["doctors"] }),
+    onSuccess: () => {
+      setDeletingDoctor(null);
+      queryClient.invalidateQueries({ queryKey: ["doctors"] });
+    },
   });
 
   const handleCreateSubmit = (e: React.FormEvent) => {
@@ -457,7 +462,7 @@ function DoctorsManagementContent() {
                       <Edit className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => deleteDoctorMutation.mutate(doc.id)}
+                      onClick={() => setDeletingDoctor(doc)}
                       className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
                       title="Delete Doctor Account"
                     >
@@ -932,6 +937,19 @@ function DoctorsManagementContent() {
           </div>
         </div>
       )}
+
+      {/* Delete Doctor Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={Boolean(deletingDoctor)}
+        doctor={deletingDoctor}
+        isDeleting={deleteDoctorMutation.isPending}
+        onClose={() => setDeletingDoctor(null)}
+        onConfirm={() => {
+          if (deletingDoctor) {
+            deleteDoctorMutation.mutate(deletingDoctor.id);
+          }
+        }}
+      />
     </div>
   );
 }

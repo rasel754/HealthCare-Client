@@ -9,8 +9,9 @@ import {
   deleteMyDoctorScheduleService,
 } from "@/src/services/schedule.services";
 import { ISchedule, IDoctorSchedule } from "@/src/types/domain.types";
+import ScheduleSlotCard from "@/src/components/modules/schedules/ScheduleSlotCard";
 import { Button } from "@/src/components/ui/button";
-import { Clock, Calendar, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Clock, Plus } from "lucide-react";
 
 export default function DoctorMySchedulesPage() {
   const queryClient = useQueryClient();
@@ -41,6 +42,9 @@ export default function DoctorMySchedulesPage() {
         setMsg("Schedule slots assigned successfully!");
         setSelectedScheduleIds([]);
         queryClient.invalidateQueries({ queryKey: ["my-doctor-schedules"] });
+        queryClient.invalidateQueries({ queryKey: ["schedules"] });
+        queryClient.invalidateQueries({ queryKey: ["master-schedules"] });
+        queryClient.invalidateQueries({ queryKey: ["all-doctor-schedules"] });
       }
     },
   });
@@ -49,6 +53,9 @@ export default function DoctorMySchedulesPage() {
     mutationFn: (scheduleId: string) => deleteMyDoctorScheduleService(scheduleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-doctor-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["master-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["all-doctor-schedules"] });
     },
   });
 
@@ -116,10 +123,10 @@ export default function DoctorMySchedulesPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold">{slot.startDate}</span>
-                    {isAlreadyAssigned && <span className="text-[10px] bg-accent text-muted-foreground px-2 py-0.5 rounded-full">Assigned</span>}
+                    <span className="font-bold">{slot.startDate || slot.startDateTime?.slice(0, 10)}</span>
+                    {isAlreadyAssigned && <span className="text-[10px] bg-accent text-muted-foreground px-2 py-0.5 rounded-full font-semibold">Assigned</span>}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">{slot.startTime} - {slot.endTime}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">{slot.startTime || "09:00"} - {slot.endTime || "09:30"}</p>
                 </button>
               );
             })}
@@ -138,31 +145,27 @@ export default function DoctorMySchedulesPage() {
             You haven&apos;t assigned any schedule slots yet. Select slots above to start receiving patient bookings.
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {myDoctorSchedules.map((ds) => (
-              <div key={ds.scheduleId} className="bg-accent/40 border border-border rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-foreground text-xs">{ds.schedule?.startDate}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{ds.schedule?.startTime} - {ds.schedule?.endTime}</p>
-                  <span
-                    className={`inline-block mt-2 text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                      ds.isBooked ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                    }`}
-                  >
-                    {ds.isBooked ? "Booked" : "Available"}
-                  </span>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {myDoctorSchedules.map((ds) => {
+              const fullSlot: ISchedule = {
+                ...(ds.schedule || {
+                  id: ds.scheduleId,
+                  startDate: "",
+                  endDate: "",
+                  startTime: "",
+                  endTime: "",
+                }),
+                isBooked: ds.isBooked,
+              };
 
-                {!ds.isBooked && (
-                  <button
-                    onClick={() => deleteMutation.mutate(ds.scheduleId)}
-                    className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            ))}
+              return (
+                <ScheduleSlotCard
+                  key={ds.scheduleId}
+                  slot={fullSlot}
+                  onDelete={() => deleteMutation.mutate(ds.scheduleId)}
+                />
+              );
+            })}
           </div>
         )}
       </div>

@@ -13,6 +13,7 @@ export default function DoctorSchedulesManagementPage() {
   const { data: schedulesResponse, isLoading } = useQuery({
     queryKey: ["all-doctor-schedules", searchTerm],
     queryFn: () => getAllDoctorSchedulesService({ searchTerm: searchTerm || undefined, limit: 50 }),
+    refetchInterval: 3000,
   });
 
   const schedules = (schedulesResponse && "data" in schedulesResponse ? schedulesResponse.data : []) as IDoctorSchedule[];

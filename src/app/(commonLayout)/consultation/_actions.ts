@@ -1,16 +1,12 @@
 "use server";
-import { httpClient } from "@/src/lib/axios/httpClient";
 
-
-interface IDoctor {
-    id: number;
-    name: string;
-    specialization: string;
-    experience: number;
-    rating: number;
-}
+import { getDoctorsService } from "@/src/services/doctor.services";
 
 export const getDoctores = async () => {
-    const doctor = await httpClient.get<IDoctor[]>("/doctors");
-    return doctor;
-}
+  try {
+    return await getDoctorsService({ limit: 20 });
+  } catch (error) {
+    console.error("Error prefetching doctors:", error);
+    return { success: false, data: [] };
+  }
+};

@@ -17,12 +17,25 @@ export const createSchedulesService = async (payload: ICreateSchedulePayload): P
   }
 };
 
-export const getSchedulesService = async (params?: IQueryParams): Promise<ApiResponse<ISchedule[]>> => {
-  return await httpClient.get<ISchedule[]>("/schedules", { params });
+export const getSchedulesService = async (params?: IQueryParams): Promise<ApiResponse<ISchedule[]> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<ISchedule[]>("/schedules", {
+      params: {
+        include: "doctorSchedules,appointments",
+        ...params,
+      },
+    });
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Failed to fetch schedules", data: [] };
+  }
 };
 
-export const getScheduleByIdService = async (id: string): Promise<ApiResponse<ISchedule>> => {
-  return await httpClient.get<ISchedule>(`/schedules/${id}`);
+export const getScheduleByIdService = async (id: string): Promise<ApiResponse<ISchedule> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<ISchedule>(`/schedules/${id}`);
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Failed to fetch schedule by id" };
+  }
 };
 
 export const updateScheduleService = async (id: string, payload: Partial<ICreateSchedulePayload>): Promise<ApiResponse<ISchedule> | ApiErrorResponse> => {
@@ -50,12 +63,25 @@ export const createMyDoctorScheduleService = async (payload: IAssignDoctorSchedu
   }
 };
 
-export const getMyDoctorSchedulesService = async (params?: IQueryParams): Promise<ApiResponse<IDoctorSchedule[]>> => {
-  return await httpClient.get<IDoctorSchedule[]>("/doctor-schedules/my-doctor-schedules", { params });
+export const getMyDoctorSchedulesService = async (params?: IQueryParams): Promise<ApiResponse<IDoctorSchedule[]> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<IDoctorSchedule[]>("/doctor-schedules/my-doctor-schedules", { params });
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Failed to fetch my doctor schedules", data: [] };
+  }
 };
 
-export const getAllDoctorSchedulesService = async (params?: IQueryParams): Promise<ApiResponse<IDoctorSchedule[]>> => {
-  return await httpClient.get<IDoctorSchedule[]>("/doctor-schedules", { params });
+export const getAllDoctorSchedulesService = async (params?: IQueryParams): Promise<ApiResponse<IDoctorSchedule[]> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<IDoctorSchedule[]>("/doctor-schedules", {
+      params: {
+        include: "schedule,doctor",
+        ...params,
+      },
+    });
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Failed to fetch all doctor schedules", data: [] };
+  }
 };
 
 export const updateMyDoctorScheduleService = async (payload: IUpdateDoctorSchedulePayload): Promise<ApiResponse<null> | ApiErrorResponse> => {
