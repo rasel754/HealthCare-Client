@@ -20,7 +20,7 @@ import AppSubmitButton from "../../shared/form/AppSubmitButton";
 import { Button } from "../../ui/button";
 import { Alert, AlertDescription } from "../../ui/alert";
 import {
-  Activity,
+  HeartPulse,
   Lock,
   Mail,
   User,
@@ -73,7 +73,7 @@ export default function RegisterForm() {
     <Card className="w-full max-w-lg mx-auto shadow-lg border border-border bg-card text-card-foreground">
       <CardHeader className="text-center pb-4">
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
-          <Activity className="h-6 w-6" />
+          <HeartPulse className="h-6 w-6" />
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">Create Patient Account</CardTitle>
         <CardDescription className="text-muted-foreground text-xs sm:text-sm">

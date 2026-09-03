@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMeService, logoutService } from "@/src/services/auth.services";
-import { Activity, LogOut, LayoutDashboard, User, Stethoscope, Calendar, ShieldAlert, Menu, X } from "lucide-react";
+import { HeartPulse, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
 import { ThemeToggle } from "@/src/components/shared/ThemeToggle";
@@ -51,9 +51,9 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary tracking-tight">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Activity className="h-5 w-5" />
+        <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-primary tracking-tight group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
+            <HeartPulse className="h-5 w-5" />
           </div>
           <span>Health<span className="text-foreground">Care</span></span>
         </Link>

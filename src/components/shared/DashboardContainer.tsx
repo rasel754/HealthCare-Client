@@ -7,6 +7,8 @@ import { getMeService, logoutService } from "@/src/services/auth.services";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardHeader from "./DashboardHeader";
 
+import MedicalLoader from "./MedicalLoader";
+
 export default function DashboardContainer({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -38,12 +40,13 @@ export default function DashboardContainer({ children }: { children: React.React
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm text-muted-foreground font-medium">Loading HealthCare Dashboard...</p>
-        </div>
-      </div>
+      <MedicalLoader
+        variant="fullscreen"
+        title="Loading HealthCare Dashboard..."
+        subtitle="Verifying medical credentials and synchronizing clinical telemetry"
+        icon="stethoscope"
+        showECG={true}
+      />
     );
   }
 

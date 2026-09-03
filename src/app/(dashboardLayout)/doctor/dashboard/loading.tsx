@@ -1,4 +1,5 @@
+import { DashboardOverviewSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 export default function DoctorDashboardLoading() {
-  // Or a custom loading skeleton component
-  return <p>Doctor Dashboard Loading...</p>;
+  return <DashboardOverviewSkeleton roleTitle="Doctor Clinical Dashboard" />;
 }

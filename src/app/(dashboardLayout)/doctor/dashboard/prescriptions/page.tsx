@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyPrescriptionsService, deletePrescriptionService } from "@/src/services/prescription.services";
 import { IPrescription } from "@/src/types/domain.types";
 import { FileText, Trash2, Calendar, User } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function DoctorPrescriptionsPage() {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export default function DoctorPrescriptionsPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading issued prescriptions...</div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1 md:grid-cols-2" message="Loading issued prescriptions..." />
       ) : prescriptions.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto" />

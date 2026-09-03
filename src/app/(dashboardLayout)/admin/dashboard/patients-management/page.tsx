@@ -9,6 +9,7 @@ import { UserStatus } from "@/src/types/auth.type";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Users, Search, ShieldAlert, CheckCircle, Ban, Mail, Phone, MapPin } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function PatientsManagementPage() {
   const queryClient = useQueryClient();
@@ -65,7 +66,7 @@ export default function PatientsManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading patients directory...</div>
+        <ClinicalCardGridSkeleton count={6} message="Loading patients directory..." />
       ) : patients.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Users className="h-12 w-12 text-muted-foreground mx-auto" />

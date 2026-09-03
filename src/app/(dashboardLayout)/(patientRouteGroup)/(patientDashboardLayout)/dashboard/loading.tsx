@@ -1,4 +1,5 @@
-export default function PatientGlobalLoading() {
-  // Or a custom loading skeleton component
-  return <p>Patient Global Loading...</p>;
+import { DashboardOverviewSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
+export default function PatientDashboardLoading() {
+  return <DashboardOverviewSkeleton roleTitle="Patient Portal" />;
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity } from "lucide-react";
+import { HeartPulse } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-bold text-xl text-white">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
-                <Activity className="h-5 w-5" />
+                <HeartPulse className="h-5 w-5" />
               </div>
               <span>HealthCare</span>
             </div>

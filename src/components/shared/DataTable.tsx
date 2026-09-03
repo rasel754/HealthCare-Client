@@ -2,6 +2,7 @@
 
 import React from "react";
 import { FolderOpen } from "lucide-react";
+import { ClinicalTableSkeleton } from "./ClinicalSkeleton";
 
 export interface ColumnConfig<T> {
   header: string;
@@ -26,17 +27,18 @@ export function DataTable<T>({
   data,
   keyExtractor,
   isLoading = false,
-  loadingMessage = "Loading data...",
+  loadingMessage = "Retrieving clinical records...",
   emptyTitle = "No Data Available",
   emptyDescription = "There are no records to display at this time.",
   className = "",
 }: DataTableProps<T>) {
   if (isLoading) {
     return (
-      <div className="py-16 flex flex-col items-center justify-center gap-3">
-        <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-muted-foreground text-xs font-medium">{loadingMessage}</p>
-      </div>
+      <ClinicalTableSkeleton
+        rows={5}
+        columns={columns.length || 5}
+        message={loadingMessage}
+      />
     );
   }
 

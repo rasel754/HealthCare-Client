@@ -9,6 +9,8 @@ import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Gender, BloodGroup, MaritalStatus } from "@/src/types/auth.type";
 import { User, Phone, MapPin, Activity, FileUp, CheckCircle2, AlertCircle } from "lucide-react";
+import { ClinicalProfileSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 
 export default function HealthRecordPage() {
   const queryClient = useQueryClient();
@@ -92,7 +94,15 @@ export default function HealthRecordPage() {
   };
 
   if (isLoading) {
-    return <div className="py-12 text-center text-xs text-slate-500">Loading health record...</div>;
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Health Profile & Medical Records</h1>
+          <p className="text-xs text-muted-foreground mt-1">Keep your personal health metrics and diagnostic reports updated</p>
+        </div>
+        <ClinicalProfileSkeleton />
+      </div>
+    );
   }
 
   return (

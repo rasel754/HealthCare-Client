@@ -7,6 +7,7 @@ import { IPayment } from "@/src/types/domain.types";
 import { PaymentStatus } from "@/src/types/auth.type";
 import { Input } from "@/src/components/ui/input";
 import { DollarSign, Search, CreditCard, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function PaymentsManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMeService } from "@/src/services/auth.services";
 import { IUser } from "@/src/types/auth.type";
 import { User, Mail, Shield, Phone, MapPin, Calendar, CheckCircle2 } from "lucide-react";
+import { ClinicalProfileSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function MyProfilePage() {
   const { data: userResponse, isLoading } = useQuery({
@@ -14,7 +15,15 @@ export default function MyProfilePage() {
   const user = (userResponse && "data" in userResponse ? userResponse.data : null) as IUser | null;
 
   if (isLoading) {
-    return <div className="py-12 text-center text-xs text-muted-foreground">Loading user profile...</div>;
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">My Profile</h1>
+          <p className="text-xs text-muted-foreground mt-1">Authenticated user credentials and system account status</p>
+        </div>
+        <ClinicalProfileSkeleton />
+      </div>
+    );
   }
 
   return (

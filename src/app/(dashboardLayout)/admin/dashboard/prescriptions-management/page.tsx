@@ -6,6 +6,7 @@ import { getAllPrescriptionsService } from "@/src/services/prescription.services
 import { IPrescription } from "@/src/types/domain.types";
 import { Input } from "@/src/components/ui/input";
 import { FileText, Search, Calendar, User, Stethoscope } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function PrescriptionsManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +23,7 @@ export default function PrescriptionsManagementPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Prescriptions Management</h1>
-          <p className="text-xs text-muted-foreground mt-1">Audit digital prescriptions issued across consultations</p>
+          <p className="text-xs text-muted-foreground mt-1">Audit and review all doctor prescriptions generated in the system</p>
         </div>
       </div>
 
@@ -30,7 +31,7 @@ export default function PrescriptionsManagementPage() {
       <div className="relative max-w-md">
         <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by doctor or patient name..."
+          placeholder="Search by doctor, patient, or instructions..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10 h-11 rounded-xl bg-background text-foreground border-input"
@@ -38,7 +39,7 @@ export default function PrescriptionsManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading system prescriptions...</div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1 md:grid-cols-2" message="Loading system prescriptions..." />
       ) : prescriptions.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto" />

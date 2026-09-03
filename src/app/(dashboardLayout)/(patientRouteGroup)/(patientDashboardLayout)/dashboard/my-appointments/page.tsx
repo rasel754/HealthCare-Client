@@ -15,6 +15,8 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Calendar, CreditCard, Video, Star, Clock, AlertCircle, CheckCircle2, X, Sparkles, ShieldCheck } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 
 function MyAppointmentsContent() {
   const searchParams = useSearchParams();
@@ -131,10 +133,7 @@ function MyAppointmentsContent() {
 
 
       {isLoading ? (
-        <div className="py-16 text-center">
-          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-          <p className="text-xs text-muted-foreground">Loading appointments...</p>
-        </div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1" message="Loading your consultation bookings..." />
       ) : appointments.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />

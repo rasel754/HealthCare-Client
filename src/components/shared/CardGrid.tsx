@@ -3,6 +3,7 @@
 import React from "react";
 import { Button } from "@/src/components/ui/button";
 import { FolderOpen, RotateCcw } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "./ClinicalSkeleton";
 
 export interface CardGridProps<T> {
   items: T[];
@@ -24,7 +25,7 @@ export function CardGrid<T>({
   renderCard,
   keyExtractor,
   isLoading = false,
-  loadingMessage = "Loading records...",
+  loadingMessage = "Retrieving clinical records...",
   emptyTitle = "No Records Found",
   emptyDescription = "No records match your criteria. Try adjusting filters or search parameters.",
   emptyIcon = <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto" />,
@@ -35,10 +36,11 @@ export function CardGrid<T>({
 }: CardGridProps<T>) {
   if (isLoading) {
     return (
-      <div className="py-16 flex flex-col items-center justify-center gap-3">
-        <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-muted-foreground text-xs font-medium">{loadingMessage}</p>
-      </div>
+      <ClinicalCardGridSkeleton
+        count={6}
+        message={loadingMessage}
+        columnsClassName={columnsClassName}
+      />
     );
   }
 

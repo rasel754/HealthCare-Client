@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Health care management system",
-  description: "Health care management system",
+  title: "HealthCare - Digital Healthcare Management System",
+  description: "Modern Digital Healthcare Platform for Doctor Consultations, Appointments, and Prescriptions",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export const dynamic = "force-dynamic";

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyReviewsService } from "@/src/services/review.services";
 import { IReview } from "@/src/types/domain.types";
 import { Star, MessageSquare } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function DoctorMyReviewsPage() {
   const { data: reviewsResponse, isLoading } = useQuery({
@@ -21,7 +22,7 @@ export default function DoctorMyReviewsPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading reviews...</div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1 md:grid-cols-2" message="Loading patient ratings & clinical reviews..." />
       ) : reviews.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Star className="h-12 w-12 text-muted-foreground mx-auto" />

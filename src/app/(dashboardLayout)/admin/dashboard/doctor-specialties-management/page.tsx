@@ -6,6 +6,7 @@ import { getDoctorsService } from "@/src/services/doctor.services";
 import { IDoctor } from "@/src/types/domain.types";
 import { Input } from "@/src/components/ui/input";
 import { Layers, Search, Stethoscope, Award } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function DoctorSpecialtiesManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,7 +39,7 @@ export default function DoctorSpecialtiesManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading doctor specialties mapping...</div>
+        <ClinicalCardGridSkeleton count={6} message="Loading doctor specialties mapping..." />
       ) : doctors.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Layers className="h-12 w-12 text-muted-foreground mx-auto" />

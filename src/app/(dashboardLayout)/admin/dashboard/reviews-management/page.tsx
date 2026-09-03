@@ -6,6 +6,7 @@ import { getAllReviewsService, deleteReviewService } from "@/src/services/review
 import { IReview } from "@/src/types/domain.types";
 import { Input } from "@/src/components/ui/input";
 import { Star, Search, Trash2, User, Stethoscope } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function ReviewsManagementPage() {
   const queryClient = useQueryClient();
@@ -27,8 +28,8 @@ export default function ReviewsManagementPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Patient Reviews & Feedback Supervision</h1>
-          <p className="text-xs text-muted-foreground mt-1">Supervise ratings and feedback comments submitted across consultations</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Patient Reviews Moderation</h1>
+          <p className="text-xs text-muted-foreground mt-1">Audit, moderate, or remove clinical reviews and ratings</p>
         </div>
       </div>
 
@@ -44,7 +45,7 @@ export default function ReviewsManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading system reviews...</div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1 md:grid-cols-2" message="Loading system reviews..." />
       ) : reviews.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Star className="h-12 w-12 text-muted-foreground mx-auto" />

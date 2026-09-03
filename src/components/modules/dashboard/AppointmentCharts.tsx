@@ -129,9 +129,49 @@ export const AppointmentCharts: React.FC<AppointmentChartsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-card border border-border rounded-3xl p-8 text-center animate-pulse space-y-4">
-        <div className="h-6 bg-accent rounded-xl w-1/3 mx-auto"></div>
-        <div className="h-48 bg-accent/40 rounded-2xl"></div>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card border border-border rounded-3xl p-6 shadow-xs">
+          <div className="space-y-2">
+            <div className="h-5 w-36 rounded-full bg-primary/10 clinical-shimmer" />
+            <div className="h-6 w-64 rounded-xl bg-muted/60 clinical-shimmer" />
+            <div className="h-3 w-80 rounded-md bg-muted/40 clinical-shimmer" />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-14 w-28 rounded-2xl bg-muted/40 clinical-shimmer" />
+            <div className="h-14 w-28 rounded-2xl bg-emerald-500/10 clinical-shimmer" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-5 bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-36 rounded-md bg-muted/60 clinical-shimmer" />
+              <div className="h-4 w-20 rounded-md bg-muted/40 clinical-shimmer" />
+            </div>
+            <div className="h-64 rounded-2xl bg-muted/20 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+              <div className="w-36 h-36 rounded-full border-8 border-muted/60 border-t-primary/60 animate-spin" />
+              <div className="absolute inset-0 clinical-shimmer" />
+            </div>
+          </div>
+
+          <div className="lg:col-span-7 bg-card border border-border rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-44 rounded-md bg-muted/60 clinical-shimmer" />
+              <div className="h-4 w-24 rounded-md bg-muted/40 clinical-shimmer" />
+            </div>
+            <div className="h-64 rounded-2xl bg-muted/20 p-6 flex items-end justify-between gap-3 relative overflow-hidden">
+              {[35, 65, 50, 85, 60, 75, 40, 70].map((h, i) => (
+                <div
+                  key={i}
+                  style={{ height: `${h}%` }}
+                  className="flex-1 rounded-t-xl bg-primary/20 relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 clinical-shimmer" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

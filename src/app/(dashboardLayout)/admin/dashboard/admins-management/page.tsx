@@ -9,6 +9,8 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { ShieldCheck, Plus, Trash2, X, RefreshCw } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 
 export default function AdminsManagementPage() {
   const queryClient = useQueryClient();
@@ -106,7 +108,7 @@ export default function AdminsManagementPage() {
       {msg && <div className="p-3.5 bg-primary/10 border border-primary/20 rounded-xl text-primary text-xs font-bold">{msg}</div>}
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading administrators...</div>
+        <ClinicalCardGridSkeleton count={6} message="Loading administrative accounts..." />
       ) : admins.length === 0 && superAdmins.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <ShieldCheck className="h-12 w-12 text-muted-foreground mx-auto" />

@@ -12,6 +12,8 @@ import { ISchedule, IDoctorSchedule } from "@/src/types/domain.types";
 import ScheduleSlotCard from "@/src/components/modules/schedules/ScheduleSlotCard";
 import { Button } from "@/src/components/ui/button";
 import { Clock, Plus } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 
 export default function DoctorMySchedulesPage() {
   const queryClient = useQueryClient();
@@ -139,7 +141,7 @@ export default function DoctorMySchedulesPage() {
         <h3 className="font-bold text-foreground text-base">My Active Assigned Schedule Slots</h3>
 
         {isLoading ? (
-          <div className="py-8 text-center text-xs text-muted-foreground">Loading schedule assignments...</div>
+          <ClinicalCardGridSkeleton count={3} columnsClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" message="Loading active schedule assignments..." />
         ) : myDoctorSchedules.length === 0 ? (
           <div className="p-8 text-center bg-accent/30 rounded-2xl border border-dashed border-border text-xs text-muted-foreground">
             You haven&apos;t assigned any schedule slots yet. Select slots above to start receiving patient bookings.

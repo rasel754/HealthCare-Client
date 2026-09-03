@@ -1,4 +1,13 @@
+import { MedicalLoader } from "@/src/components/shared/MedicalLoader";
+
 export default function GlobalLoading() {
-  // Or a custom loading skeleton component
-  return <p>Global Loading...</p>;
+  return (
+    <MedicalLoader
+      variant="fullscreen"
+      title="HealthCare Medical Portal"
+      subtitle="Initializing clinical environment and secure workspace"
+      icon="heart"
+      showECG={true}
+    />
+  );
 }

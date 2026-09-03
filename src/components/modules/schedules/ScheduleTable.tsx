@@ -28,7 +28,6 @@ import {
   ChevronRight,
   Clock,
   MoreHorizontal,
-  Stethoscope,
   UserCheck,
 } from "lucide-react";
 
@@ -330,11 +329,43 @@ export default function ScheduleTable({
 
             <TableBody>
               {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="h-32 text-center text-xs text-muted-foreground">
-                    Loading schedules data...
-                  </TableCell>
-                </TableRow>
+                Array.from({ length: 5 }).map((_, rIdx) => (
+                  <TableRow key={rIdx} className="hover:bg-transparent">
+                    <TableCell className="pl-6 py-4">
+                      <div className="h-4 w-4 rounded bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-xl bg-muted/60 clinical-shimmer" />
+                        <div className="space-y-1 flex-1">
+                          <div className="h-3 w-24 rounded bg-muted/60 clinical-shimmer" />
+                          <div className="h-2.5 w-16 rounded bg-muted/40 clinical-shimmer" />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-3 w-20 rounded bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-3 w-16 rounded bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-3 w-14 rounded bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-5 w-16 rounded-full bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-5 w-16 rounded-full bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-3 w-16 rounded bg-muted/60 clinical-shimmer" />
+                    </TableCell>
+                    <TableCell className="pr-6 text-right">
+                      <div className="h-7 w-16 rounded-xl bg-muted/60 clinical-shimmer ml-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))
               ) : paginatedSchedules.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="h-36 text-center text-xs text-muted-foreground space-y-2">

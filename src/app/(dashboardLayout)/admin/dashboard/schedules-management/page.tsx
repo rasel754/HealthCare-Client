@@ -10,6 +10,8 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Clock, Plus, X, LayoutGrid, Table as TableIcon } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 
 export default function SchedulesManagementPage() {
   const queryClient = useQueryClient();
@@ -126,7 +128,7 @@ export default function SchedulesManagementPage() {
       ) : (
         <div className="space-y-4">
           {isLoading ? (
-            <div className="py-12 text-center text-xs text-muted-foreground">Loading schedule slots...</div>
+            <ClinicalCardGridSkeleton count={6} message="Loading schedule slots..." />
           ) : schedules.length === 0 ? (
             <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
               <Clock className="h-12 w-12 text-muted-foreground mx-auto" />

@@ -9,6 +9,8 @@ import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Plus, Trash2, Edit, Layers, X } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 
 export default function SpecialtiesManagementPage() {
   const queryClient = useQueryClient();
@@ -120,7 +122,7 @@ export default function SpecialtiesManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading specialties...</div>
+        <ClinicalCardGridSkeleton count={6} message="Loading clinical specialties..." />
       ) : specialties.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Layers className="h-12 w-12 text-muted-foreground mx-auto" />

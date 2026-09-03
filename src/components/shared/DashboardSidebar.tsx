@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Activity,
+  HeartPulse,
   Calendar,
   Clock,
   FileText,
@@ -81,7 +81,7 @@ export default function DashboardSidebar({ user, onLogout }: SidebarProps) {
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary px-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Activity className="h-5 w-5" />
+            <HeartPulse className="h-5 w-5" />
           </div>
           <span>Health<span className="text-foreground">Care</span></span>
         </Link>

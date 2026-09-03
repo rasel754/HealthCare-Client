@@ -5,6 +5,7 @@ import { getMyPrescriptionsService } from "@/src/services/prescription.services"
 import { IPrescription } from "@/src/types/domain.types";
 import { FileText, Calendar, User, Clock, Download } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function MyPrescriptionsPage() {
   const { data: prescriptionsResponse, isLoading } = useQuery({
@@ -22,10 +23,7 @@ export default function MyPrescriptionsPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-16 text-center">
-          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-          <p className="text-xs text-muted-foreground">Loading prescriptions...</p>
-        </div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1 md:grid-cols-2" message="Loading your active prescriptions..." />
       ) : prescriptions.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <FileText className="h-12 w-12 text-muted-foreground mx-auto" />

@@ -1,4 +1,5 @@
+import { DashboardOverviewSkeleton } from "@/src/components/shared/ClinicalSkeleton";
+
 export default function AdminDashboardLoading() {
-  // Or a custom loading skeleton component
-  return <p>Admin Dashboard Loading...</p>;
+  return <DashboardOverviewSkeleton roleTitle="Admin System Overview" />;
 }

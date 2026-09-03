@@ -6,6 +6,7 @@ import { IAppointment } from "@/src/types/domain.types";
 import { AppointmentStatus } from "@/src/types/auth.type";
 import { Calendar, Clock, Video, CheckCircle2 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function AppointmentsManagementPage() {
   const queryClient = useQueryClient();
@@ -29,7 +30,7 @@ export default function AppointmentsManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading system appointments...</div>
+        <ClinicalCardGridSkeleton count={4} columnsClassName="grid-cols-1" message="Loading system appointments..." />
       ) : appointments.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />

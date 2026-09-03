@@ -6,6 +6,7 @@ import { getAllDoctorSchedulesService } from "@/src/services/schedule.services";
 import { IDoctorSchedule } from "@/src/types/domain.types";
 import { Input } from "@/src/components/ui/input";
 import { Clock, Search, Calendar, Stethoscope, CheckCircle2 } from "lucide-react";
+import { ClinicalCardGridSkeleton } from "@/src/components/shared/ClinicalSkeleton";
 
 export default function DoctorSchedulesManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +40,7 @@ export default function DoctorSchedulesManagementPage() {
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-muted-foreground">Loading doctor schedules...</div>
+        <ClinicalCardGridSkeleton count={6} message="Loading doctor assigned schedules..." />
       ) : schedules.length === 0 ? (
         <div className="bg-card text-card-foreground p-12 rounded-3xl border border-border text-center space-y-3 shadow-xs">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto" />
