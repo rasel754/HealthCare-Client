@@ -113,8 +113,21 @@ export interface IPatient {
   contactNumber?: string;
   address?: string;
   status?: UserStatus;
+  userId?: string;
+  user?: {
+    id?: string;
+    email?: string;
+    name?: string;
+    role?: Role;
+    status?: UserStatus;
+    image?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    [key: string]: any;
+  };
   isDeleted?: boolean;
   patientHealthData?: IPatientHealthData;
+  medicalReports?: IMedicalReport[];
   medicalReport?: IMedicalReport[];
   createdAt?: string;
   updatedAt?: string;

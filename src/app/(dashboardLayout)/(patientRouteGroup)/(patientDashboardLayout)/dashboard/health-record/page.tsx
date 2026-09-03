@@ -67,28 +67,25 @@ export default function HealthRecordPage() {
       });
     }
 
-    formData.append(
-      "patientInfo",
-      JSON.stringify({
-        name,
-        contactNumber,
-        address,
-      })
-    );
-
-    formData.append(
-      "patientHealthData",
-      JSON.stringify({
+    const dataPayload: Record<string, unknown> = {
+      patientInfo: {
+        ...(name ? { name } : {}),
+        ...(contactNumber ? { contactNumber } : {}),
+        ...(address ? { address } : {}),
+      },
+      patientHealthData: {
         gender,
-        dateOfBirth,
+        ...(dateOfBirth ? { dateOfBirth } : {}),
         bloodGroup,
-        height,
-        weight,
+        ...(height ? { height } : {}),
+        ...(weight ? { weight } : {}),
         maritalStatus,
         hasAllergies,
         hasDiabetes,
-      })
-    );
+      },
+    };
+
+    formData.append("data", JSON.stringify(dataPayload));
 
     updateProfileMutation.mutate(formData);
   };

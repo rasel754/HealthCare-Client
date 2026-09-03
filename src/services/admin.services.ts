@@ -29,11 +29,25 @@ export const getAdminByIdService = async (id: string): Promise<ApiResponse<IAdmi
   return await httpClient.get<IAdmin>(`/admins/${id}`);
 };
 
-export const updateAdminService = async (id: string, payload: Partial<IAdmin>): Promise<ApiResponse<IAdmin> | ApiErrorResponse> => {
+export const updateAdminService = async (id: string, payload: Partial<IAdmin> | FormData): Promise<ApiResponse<IAdmin> | ApiErrorResponse> => {
   try {
+    if (payload instanceof FormData) {
+      return await httpClient.patchForm<IAdmin>(`/admins/${id}`, payload);
+    }
     return await httpClient.patch<IAdmin>(`/admins/${id}`, payload);
   } catch (error: any) {
     return { success: false, message: error?.message || "Failed to update admin" };
+  }
+};
+
+export const updateSuperAdminService = async (id: string, payload: Partial<ISuperAdmin> | FormData): Promise<ApiResponse<ISuperAdmin> | ApiErrorResponse> => {
+  try {
+    if (payload instanceof FormData) {
+      return await httpClient.patchForm<ISuperAdmin>(`/super-admins/${id}`, payload);
+    }
+    return await httpClient.patch<ISuperAdmin>(`/super-admins/${id}`, payload);
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Failed to update super admin" };
   }
 };
 

@@ -62,6 +62,10 @@ export interface IUser {
   emailVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  doctor?: any;
+  patient?: any;
+  admin?: any;
+  superAdmin?: any;
 }
 
 export interface ILoginResponse {

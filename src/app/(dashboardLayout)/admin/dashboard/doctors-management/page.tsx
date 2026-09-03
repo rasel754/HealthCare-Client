@@ -120,6 +120,9 @@ function DoctorsManagementContent() {
   const [editFee, setEditFee] = useState<number>(50);
   const [editExp, setEditExp] = useState<number>(5);
   const [editGender, setEditGender] = useState<Gender>(Gender.MALE);
+  const [editSpecialtyIds, setEditSpecialtyIds] = useState<string[]>([]);
+  const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null);
+  const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null);
 
   const { data: specialtiesResponse } = useQuery({
     queryKey: ["specialties"],
@@ -323,27 +326,60 @@ function DoctorsManagementContent() {
     setEditFee(doc.appointmentFee || 50);
     setEditExp(doc.experience || 5);
     setEditGender(doc.gender || Gender.MALE);
+    setEditPhotoFile(null);
+    setEditPhotoPreview(doc.profilePhoto || null);
+
+    const initialSpecialtyIds =
+      doc.specialties?.map((s: any) => (typeof s === "string" ? s : s.id || s.specialtyId || s.specialty?.id)).filter(Boolean) ||
+      doc.doctorSpecialties?.map((ds: any) => ds.specialtiesId || ds.specialties?.id).filter(Boolean) ||
+      [];
+    setEditSpecialtyIds(initialSpecialtyIds as string[]);
+  };
+
+  const toggleEditSpecialtySelect = (id: string) => {
+    if (editSpecialtyIds.includes(id)) {
+      setEditSpecialtyIds(editSpecialtyIds.filter((item) => item !== id));
+    } else {
+      setEditSpecialtyIds([...editSpecialtyIds, id]);
+    }
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDoctor) return;
     setMsg(null);
-    updateDoctorMutation.mutate({
-      id: editingDoctor.id,
-      payload: {
-        name: editName,
-        contactNumber: editContact,
-        address: editAddress || undefined,
-        registrationNumber: editRegNum,
-        qualification: editQual,
-        designation: editDesig,
-        currentWorkingPlace: editWorkPlace,
-        appointmentFee: Number(editFee),
-        experience: Number(editExp),
-        gender: editGender,
-      },
-    });
+
+    const dataPayload: Record<string, unknown> = {
+      name: editName,
+      contactNumber: editContact,
+      address: editAddress || undefined,
+      registrationNumber: editRegNum,
+      qualification: editQual,
+      designation: editDesig,
+      currentWorkingPlace: editWorkPlace,
+      appointmentFee: Number(editFee),
+      experience: Number(editExp),
+      gender: editGender,
+    };
+
+    if (editSpecialtyIds.length > 0) {
+      dataPayload.specialties = editSpecialtyIds;
+    }
+
+    if (editPhotoFile) {
+      const formData = new FormData();
+      formData.append("profilePhoto", editPhotoFile);
+      formData.append("data", JSON.stringify(dataPayload));
+      updateDoctorMutation.mutate({
+        id: editingDoctor.id,
+        payload: formData,
+      });
+    } else {
+      updateDoctorMutation.mutate({
+        id: editingDoctor.id,
+        payload: dataPayload,
+      });
+    }
   };
 
   const toggleSpecialtySelect = (id: string) => {
@@ -870,13 +906,40 @@ function DoctorsManagementContent() {
             {msg && <div className="p-3 bg-accent text-accent-foreground rounded-xl text-xs font-semibold">{msg}</div>}
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
+              {/* Profile Photo Upload */}
+              <div className="p-4 bg-muted/40 border border-border rounded-2xl flex items-center gap-4">
+                <div className="h-16 w-16 rounded-2xl bg-primary/10 border-2 border-dashed border-primary flex items-center justify-center overflow-hidden shrink-0">
+                  {editPhotoPreview ? (
+                    <img src={editPhotoPreview} alt="Preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <UserCheck className="h-7 w-7 text-primary" />
+                  )}
+                </div>
+                <div className="space-y-1 flex-1">
+                  <p className="text-xs font-bold uppercase text-foreground">Doctor Profile Picture</p>
+                  <p className="text-[11px] text-muted-foreground">Select a high-resolution JPG, PNG or WEBP image</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEditPhotoFile(file);
+                        setEditPhotoPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="text-xs text-muted-foreground file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Doctor Name</Label>
+                  <Label>Doctor Name *</Label>
                   <Input required placeholder="Doctor full name" value={editName} onChange={(e) => setEditName(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
-                  <Label>Contact Number</Label>
+                  <Label>Contact Number *</Label>
                   <Input required placeholder="Contact phone number" value={editContact} onChange={(e) => setEditContact(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
@@ -888,37 +951,37 @@ function DoctorsManagementContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Registration Number</Label>
+                  <Label>Registration Number *</Label>
                   <Input required placeholder="Registration number" value={editRegNum} onChange={(e) => setEditRegNum(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
-                  <Label>Qualification</Label>
+                  <Label>Qualification *</Label>
                   <Input required placeholder="Medical qualifications" value={editQual} onChange={(e) => setEditQual(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label>Designation</Label>
+                  <Label>Designation *</Label>
                   <Input required placeholder="Designation" value={editDesig} onChange={(e) => setEditDesig(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
-                  <Label>Current Working Place</Label>
+                  <Label>Current Working Place *</Label>
                   <Input required placeholder="Hospital / Workplace" value={editWorkPlace} onChange={(e) => setEditWorkPlace(e.target.value)} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <Label>Appointment Fee ($)</Label>
+                  <Label>Appointment Fee ($) *</Label>
                   <Input required type="number" placeholder="Fee amount" value={editFee} onChange={(e) => setEditFee(Number(e.target.value))} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
-                  <Label>Experience (Years)</Label>
+                  <Label>Experience (Years) *</Label>
                   <Input required type="number" placeholder="Years of experience" value={editExp} onChange={(e) => setEditExp(Number(e.target.value))} className="rounded-xl mt-1 bg-background text-foreground border-input" />
                 </div>
                 <div>
-                  <Label>Gender</Label>
+                  <Label>Gender *</Label>
                   <select
                     value={editGender}
                     onChange={(e) => setEditGender(e.target.value as Gender)}
@@ -926,7 +989,32 @@ function DoctorsManagementContent() {
                   >
                     <option value={Gender.MALE}>Male</option>
                     <option value={Gender.FEMALE}>Female</option>
+                    <option value={Gender.OTHER}>Other</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Specialties Multi-Select */}
+              <div className="space-y-2 pt-2">
+                <Label>Assigned Medical Specialties ({editSpecialtyIds.length} selected)</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto pr-1">
+                  {specialties.map((s) => {
+                    const isSelected = editSpecialtyIds.includes(s.id);
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => toggleEditSpecialtySelect(s.id)}
+                        className={`p-2 rounded-xl border text-xs text-left transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/10 font-bold text-primary"
+                            : "border-border bg-card text-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {s.title}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

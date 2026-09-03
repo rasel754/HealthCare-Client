@@ -21,8 +21,11 @@ export const createDoctorService = async (payload: ICreateDoctorPayload): Promis
   }
 };
 
-export const updateDoctorService = async (id: string, payload: IUpdateDoctorPayload): Promise<ApiResponse<IDoctor> | ApiErrorResponse> => {
+export const updateDoctorService = async (id: string, payload: IUpdateDoctorPayload | FormData): Promise<ApiResponse<IDoctor> | ApiErrorResponse> => {
   try {
+    if (payload instanceof FormData) {
+      return await httpClient.patchForm<IDoctor>(`/doctors/${id}`, payload);
+    }
     return await httpClient.patch<IDoctor>(`/doctors/${id}`, payload);
   } catch (error: any) {
     return { success: false, message: error?.message || "Failed to update doctor" };
