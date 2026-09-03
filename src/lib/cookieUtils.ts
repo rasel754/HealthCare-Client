@@ -12,10 +12,11 @@ export const setCookie = async (
         cookieStore.set(name, value, {
             httpOnly : true,
             secure : process.env.NODE_ENV === "production",
-            sameSite : "strict",
+            sameSite : "lax",
             path : "/",
             maxAge : maxAgeInSeconds,
         });
+
     } catch {
         // ignore when cookies unavailable
     }

@@ -171,12 +171,24 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
        }
 
-       // Rule - 4 User is Not logged in but trying to access protected route -> redirect to login
+       // Rule - 4 User is Not logged in but trying to access protected route -> try refreshing token if refreshToken exists, else redirect to login
        if(!accessToken || !isValidAccessToken){
+        if (refreshToken) {
+            try {
+                const refreshed = await refreshTokenMiddleware(refreshToken);
+                if (refreshed) {
+                    return NextResponse.next();
+                }
+            } catch (error) {
+                console.error("Error refreshing token in proxy:", error);
+            }
+        }
+
         const loginUrl = new URL("/login", request.url);
         loginUrl.searchParams.set("redirect", pathname);
         return NextResponse.redirect(loginUrl);
        }
+
 
        //Rule - Enforcing user to stay in reset password or verify email page if their needPasswordChange or isEmailVerified flags are not satisfied respectively
 

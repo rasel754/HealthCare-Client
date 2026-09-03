@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getDoctorsService } from "@/src/services/doctor.services";
 import { getSpecialtiesService } from "@/src/services/specialty.services";
 import { IDoctor, ISpecialty } from "@/src/types/domain.types";
@@ -9,14 +11,13 @@ import { Gender } from "@/src/types/auth.type";
 import { Button } from "@/src/components/ui/button";
 import SearchAndFilterBar from "@/src/components/shared/SearchAndFilterBar";
 import CardGrid from "@/src/components/shared/CardGrid";
-import { Stethoscope, MapPin, Award, Calendar } from "lucide-react";
-import BookAppointmentModal from "./BookAppointmentModal";
+import { Stethoscope, MapPin, Award, Calendar, ArrowRight } from "lucide-react";
 
 export default function DoctorList() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGender, setSelectedGender] = useState<string>("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("");
-  const [activeDoctorForBooking, setActiveDoctorForBooking] = useState<IDoctor | null>(null);
 
   const { data: specialtiesResponse } = useQuery({
     queryKey: ["specialties"],
@@ -71,7 +72,7 @@ export default function DoctorList() {
           Find & Book Specialist Doctors
         </h1>
         <p className="text-muted-foreground text-sm">
-          Browse top medical professionals, check real-time availability slots, and book instant consultations.
+          Browse top medical professionals, check real-time availability slots, and proceed to instant booking & checkout.
         </p>
       </div>
 
@@ -141,23 +142,15 @@ export default function DoctorList() {
               </div>
 
               <Button
-                onClick={() => setActiveDoctorForBooking(doc)}
+                onClick={() => router.push(`/consultation/doctor/${doc.id}`)}
                 className="rounded-xl gap-2 text-xs font-semibold px-4 h-10 shadow-sm"
               >
-                <Calendar className="h-4 w-4" /> Book Slot
+                <Calendar className="h-4 w-4" /> Book Slot <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
         )}
       />
-
-      {/* Booking Modal */}
-      {activeDoctorForBooking && (
-        <BookAppointmentModal
-          doctor={activeDoctorForBooking}
-          onClose={() => setActiveDoctorForBooking(null)}
-        />
-      )}
     </div>
   );
 }

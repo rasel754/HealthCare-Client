@@ -1,26 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyAppointmentsService, initiatePaymentService } from "@/src/services/appointment.services";
+import {
+  getMyAppointmentsService,
+  initiatePaymentService,
+  confirmPaymentService,
+} from "@/src/services/appointment.services";
 import { createReviewService } from "@/src/services/review.services";
 import { IAppointment } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
-import { Calendar, CreditCard, Video, Star, Clock, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { Calendar, CreditCard, Video, Star, Clock, AlertCircle, CheckCircle2, X, Sparkles, ShieldCheck } from "lucide-react";
 
-export default function MyAppointmentsPage() {
+function MyAppointmentsContent() {
+  const searchParams = useSearchParams();
+  const paymentStatusParam = searchParams.get("payment");
+  const bookedParam = searchParams.get("booked");
   const queryClient = useQueryClient();
   const [selectedReviewAppointment, setSelectedReviewAppointment] = useState<IAppointment | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [reviewMsg, setReviewMsg] = useState<string | null>(null);
+  const [dismissBanner, setDismissBanner] = useState(false);
+
+  useEffect(() => {
+    if (paymentStatusParam === "success" || searchParams.get("session_id") || searchParams.get("appointment_id")) {
+      const appointmentId = searchParams.get("appointment_id") || undefined;
+      const paymentId = searchParams.get("payment_id") || undefined;
+      const sessionId = searchParams.get("session_id") || undefined;
+
+      confirmPaymentService({
+        appointmentId,
+        paymentId,
+        sessionId,
+      })
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
+          queryClient.invalidateQueries({ queryKey: ["stats"] });
+          queryClient.invalidateQueries({ queryKey: ["admin-payments"] });
+        })
+        .catch((err) => {
+          console.error("Error confirming payment on appointments page:", err);
+        });
+    }
+  }, [paymentStatusParam, searchParams, queryClient]);
 
   const { data: appointmentsResponse, isLoading } = useQuery({
     queryKey: ["my-appointments"],
     queryFn: () => getMyAppointmentsService(),
   });
+
 
   const appointments = (appointmentsResponse && "data" in appointmentsResponse ? appointmentsResponse.data : []) as IAppointment[];
 
@@ -62,12 +95,40 @@ export default function MyAppointmentsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Payment Success Banner */}
+      {!dismissBanner && (paymentStatusParam === "success" || bookedParam === "true") && (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 p-4 rounded-2xl flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">
+                {paymentStatusParam === "success"
+                  ? "Payment Confirmed! Appointment Status: PAID"
+                  : "Appointment Successfully Scheduled!"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Your doctor consultation appointment is confirmed and ready in your schedule.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setDismissBanner(true)}
+            className="p-1 rounded-lg hover:bg-emerald-500/20 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">My Appointments</h1>
           <p className="text-xs text-muted-foreground mt-1">Track scheduled consultations, payment status, and video session links</p>
         </div>
       </div>
+
 
       {isLoading ? (
         <div className="py-16 text-center">
@@ -210,5 +271,13 @@ export default function MyAppointmentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MyAppointmentsPage() {
+  return (
+    <Suspense fallback={<div className="py-16 text-center text-xs text-muted-foreground">Loading appointments...</div>}>
+      <MyAppointmentsContent />
+    </Suspense>
   );
 }

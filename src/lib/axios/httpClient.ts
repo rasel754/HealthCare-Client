@@ -44,9 +44,16 @@ const axiosInstance = async () => {
         const accessToken = cookieStore.get("accessToken")?.value;
         const refreshToken = cookieStore.get("refreshToken")?.value;
 
-        if(accessToken && refreshToken){
+        if (accessToken && refreshToken) {
             await tryRefreshToken(accessToken, refreshToken);
+        } else if (!accessToken && refreshToken) {
+            try {
+                await getNewTokensWithRefreshToken(refreshToken);
+            } catch (err) {
+                console.error("Failed to get new tokens with refresh token:", err);
+            }
         }
+
 
         cookieHeader = cookieStore
                                     .getAll()

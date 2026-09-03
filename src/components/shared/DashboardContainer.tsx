@@ -14,16 +14,18 @@ export default function DashboardContainer({ children }: { children: React.React
   const { data: userResponse, isLoading } = useQuery({
     queryKey: ["me"],
     queryFn: () => getMeService(),
-    retry: false,
+    retry: 1,
+    staleTime: 1000 * 60 * 5,
   });
 
   const user = userResponse && "data" in userResponse ? userResponse.data : null;
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && userResponse && "success" in userResponse && !userResponse.success) {
       router.replace("/login");
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, userResponse, router]);
+
 
   const logoutMutation = useMutation({
     mutationFn: logoutService,

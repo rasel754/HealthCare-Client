@@ -62,22 +62,32 @@ export const registerPatientService = async (payload: IRegisterPayload): Promise
 export const getMeService = async (): Promise<ApiResponse<IUser> | ApiErrorResponse> => {
   try {
     let accessToken: string | undefined;
+    let refreshToken: string | undefined;
     let sessionToken: string | undefined;
     try {
       const cookieStore = await cookies();
       accessToken = cookieStore.get("accessToken")?.value;
+      refreshToken = cookieStore.get("refreshToken")?.value;
       sessionToken = cookieStore.get("better-auth.session_token")?.value;
     } catch {
       // cookies unavailable during build
     }
-    if (!accessToken && !sessionToken) {
+    if (!accessToken && !refreshToken && !sessionToken) {
       return { success: false, message: "Unauthenticated" };
+    }
+    if (!accessToken && refreshToken) {
+      try {
+        await getNewTokensWithRefreshToken(refreshToken);
+      } catch (err) {
+        console.error("Error refreshing token in getMeService:", err);
+      }
     }
     return await httpClient.get<IUser>("/auth/me");
   } catch (error: any) {
     return { success: false, message: error?.message || "Failed to fetch user details" };
   }
 };
+
 
 export const logoutService = async (): Promise<ApiResponse<null> | ApiErrorResponse> => {
   try {

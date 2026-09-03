@@ -55,3 +55,20 @@ export const changeAppointmentStatusService = async (id: string, status: Appoint
     return { success: false, message: error?.message || "Failed to update appointment status" };
   }
 };
+
+export const confirmPaymentService = async (payload: {
+  appointmentId?: string;
+  paymentId?: string;
+  transactionId?: string;
+  sessionId?: string;
+  paymentGatewayData?: any;
+}): Promise<ApiResponse<any> | ApiErrorResponse> => {
+  try {
+    return await httpClient.post<any>("/payment/confirm-payment", payload);
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Failed to confirm payment" };
+  }
+};
+
+
+

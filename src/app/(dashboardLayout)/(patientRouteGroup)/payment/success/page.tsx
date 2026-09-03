@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/src/components/ui/button";
 import { CheckCircle2, Calendar, ArrowRight, ShieldCheck } from "lucide-react";
@@ -9,8 +9,17 @@ import { CheckCircle2, Calendar, ArrowRight, ShieldCheck } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 function PaymentSuccessContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const transactionId = searchParams.get("transactionId") || searchParams.get("session_id");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace("/dashboard/my-appointments?payment=success&status=PAID");
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [router]);
+
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-4 space-y-8 text-center">
