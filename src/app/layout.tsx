@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProviders from "../providers/QueryProvider";
 import { ThemeProvider } from "../providers/ThemeProvider";
+import AiChatbotWidget from "@/src/components/modules/rag/AiChatbotWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,10 +46,12 @@ export default function RootLayout({
         >
           <QueryProviders>
             {children}
+            <AiChatbotWidget />
           </QueryProviders>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
 
