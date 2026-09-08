@@ -13,7 +13,8 @@ if(!API_BASE_URL) {
 
 async function tryRefreshToken(
     accessToken: string,
-    refreshToken: string
+    refreshToken: string,
+    sessionToken?: string
 ): Promise<void>
 {
     if(!isTokenExpiringSoon(accessToken)) {
@@ -31,7 +32,7 @@ async function tryRefreshToken(
     }
 
     try {
-        await getNewTokensWithRefreshToken(refreshToken);
+        await getNewTokensWithRefreshToken(refreshToken, sessionToken);
     } catch (error : any) {
         console.error("Error refreshing token in http client:", error);
     }
@@ -43,12 +44,16 @@ const axiosInstance = async () => {
         const cookieStore = await cookies();
         const accessToken = cookieStore.get("accessToken")?.value;
         const refreshToken = cookieStore.get("refreshToken")?.value;
+        const sessionToken =
+            cookieStore.get("better-auth.session_token")?.value ||
+            cookieStore.get("better-auth-session")?.value ||
+            cookieStore.get("better-auth-session-token")?.value;
 
         if (accessToken && refreshToken) {
-            await tryRefreshToken(accessToken, refreshToken);
+            await tryRefreshToken(accessToken, refreshToken, sessionToken);
         } else if (!accessToken && refreshToken) {
             try {
-                await getNewTokensWithRefreshToken(refreshToken);
+                await getNewTokensWithRefreshToken(refreshToken, sessionToken);
             } catch (err) {
                 console.error("Failed to get new tokens with refresh token:", err);
             }

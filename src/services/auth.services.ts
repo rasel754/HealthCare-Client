@@ -140,41 +140,86 @@ export const changePasswordService = async (payload: IChangePasswordPayload): Pr
   }
 };
 
-export async function getNewTokensWithRefreshToken(refreshToken  : string) : Promise<boolean> {
+export async function getNewTokensWithRefreshToken(
+  refreshToken?: string,
+  sessionToken?: string
+): Promise<boolean> {
+  try {
+    let actualRefreshToken = refreshToken;
+    let actualSessionToken = sessionToken;
     try {
-        const res = await fetch(`${BASE_API_URL}/auth/refresh-token`, {
-            method: "POST",
-            headers:{
-                "Content-Type": "application/json",
-                Cookie : `refreshToken=${refreshToken}`
-            }
-        });
-
-        if(!res.ok){
-            return false;
-        }
-
-        const {data} = await res.json();
-
-        const { accessToken, refreshToken: newRefreshToken, token } = data;
-
-        if(accessToken){
-            await setTokenInCookies("accessToken", accessToken);
-        }
-
-        if(newRefreshToken){
-            await setTokenInCookies("refreshToken", newRefreshToken);
-        }
-
-        if(token){
-            await setTokenInCookies("better-auth.session_token", token, 24 * 60 * 60); // 1 day in seconds
-        }
-
-        return true;
-    } catch (error) {
-        console.error("Error refreshing token:", error);
-        return false;
+      const cookieStore = await cookies();
+      if (!actualRefreshToken) {
+        actualRefreshToken = cookieStore.get("refreshToken")?.value;
+      }
+      if (!actualSessionToken) {
+        actualSessionToken =
+          cookieStore.get("better-auth.session_token")?.value ||
+          cookieStore.get("better-auth-session")?.value ||
+          cookieStore.get("better-auth-session-token")?.value;
+      }
+    } catch {
+      // cookies unavailable
     }
+
+    if (!actualRefreshToken) {
+      return false;
+    }
+
+    const cookieParts = [`refreshToken=${actualRefreshToken}`];
+    if (actualSessionToken) {
+      cookieParts.push(`better-auth.session_token=${actualSessionToken}`);
+      cookieParts.push(`better-auth-session=${actualSessionToken}`);
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Cookie: cookieParts.join("; "),
+    };
+
+    if (actualSessionToken) {
+      headers["Authorization"] = `Bearer ${actualSessionToken}`;
+      headers["x-session-token"] = actualSessionToken;
+    }
+
+    const res = await fetch(`${BASE_API_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        refreshToken: actualRefreshToken,
+        sessionToken: actualSessionToken,
+      }),
+    });
+
+    if (!res.ok) {
+      return false;
+    }
+
+    const json = await res.json();
+    const data = json?.data || json;
+
+    if (!data) return false;
+
+    const { accessToken, refreshToken: newRefreshToken, sessionToken: newSessionToken, token: fallbackToken } = data;
+
+    if (accessToken) {
+      await setTokenInCookies("accessToken", accessToken);
+    }
+
+    if (newRefreshToken) {
+      await setTokenInCookies("refreshToken", newRefreshToken);
+    }
+
+    const finalSessionToken = newSessionToken || fallbackToken;
+    if (finalSessionToken) {
+      await setTokenInCookies("better-auth.session_token", finalSessionToken, 24 * 60 * 60);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    return false;
+  }
 }
 
 export async function getUserInfo() {

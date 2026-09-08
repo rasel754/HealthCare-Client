@@ -36,16 +36,39 @@ export const initiatePaymentService = async (appointmentId: string): Promise<Api
   }
 };
 
-export const getMyAppointmentsService = async (params?: IQueryParams): Promise<ApiResponse<IAppointment[]>> => {
-  return await httpClient.get<IAppointment[]>("/appointments/my-appointments", { params });
+export const getMyAppointmentsService = async (params?: IQueryParams): Promise<ApiResponse<IAppointment[]> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<IAppointment[]>("/appointments/my-appointments", { params });
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message || error?.message || "Failed to fetch appointments",
+      data: [] as IAppointment[],
+    } as any;
+  }
 };
 
-export const getMySingleAppointmentService = async (id: string): Promise<ApiResponse<IAppointment>> => {
-  return await httpClient.get<IAppointment>(`/appointments/my-single-appointment/${id}`);
+export const getMySingleAppointmentService = async (id: string): Promise<ApiResponse<IAppointment> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<IAppointment>(`/appointments/my-single-appointment/${id}`);
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message || error?.message || "Failed to fetch appointment",
+    };
+  }
 };
 
-export const getAllAppointmentsService = async (params?: IQueryParams): Promise<ApiResponse<IAppointment[]>> => {
-  return await httpClient.get<IAppointment[]>("/appointments/all-appointments", { params });
+export const getAllAppointmentsService = async (params?: IQueryParams): Promise<ApiResponse<IAppointment[]> | ApiErrorResponse> => {
+  try {
+    return await httpClient.get<IAppointment[]>("/appointments/all-appointments", { params });
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error?.response?.data?.message || error?.message || "Failed to fetch all appointments",
+      data: [] as IAppointment[],
+    } as any;
+  }
 };
 
 export const changeAppointmentStatusService = async (id: string, status: AppointmentStatus): Promise<ApiResponse<IAppointment> | ApiErrorResponse> => {

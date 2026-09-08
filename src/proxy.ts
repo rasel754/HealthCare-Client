@@ -3,15 +3,29 @@ import { getDefaultDashboardRoute, getRouteOwner, isAuthRoute, isValidRedirectFo
 
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-async function refreshTokenMiddleware(refreshToken: string): Promise<boolean> {
+async function refreshTokenMiddleware(refreshToken: string, sessionToken?: string): Promise<boolean> {
   try {
-    if (!BASE_API_URL) return false;
+    if (!BASE_API_URL || !refreshToken) return false;
+    const cookieParts = [`refreshToken=${refreshToken}`];
+    if (sessionToken) {
+      cookieParts.push(`better-auth.session_token=${sessionToken}`);
+      cookieParts.push(`better-auth-session=${sessionToken}`);
+    }
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Cookie: cookieParts.join("; "),
+    };
+    if (sessionToken) {
+      headers["Authorization"] = `Bearer ${sessionToken}`;
+      headers["x-session-token"] = sessionToken;
+    }
     const res = await fetch(`${BASE_API_URL}/auth/refresh-token`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: `refreshToken=${refreshToken}`,
-      },
+      headers,
+      body: JSON.stringify({
+        refreshToken,
+        sessionToken,
+      }),
     });
     return res.ok;
   } catch (error) {
@@ -66,10 +80,15 @@ export async function proxy(request: NextRequest) {
 
        let accessToken: string | undefined;
        let refreshToken: string | undefined;
+       let sessionToken: string | undefined;
 
        try {
            accessToken = request.cookies.get("accessToken")?.value;
            refreshToken = request.cookies.get("refreshToken")?.value;
+           sessionToken =
+               request.cookies.get("better-auth.session_token")?.value ||
+               request.cookies.get("better-auth-session")?.value ||
+               request.cookies.get("better-auth-session-token")?.value;
        } catch {
            return NextResponse.next();
        }
@@ -102,7 +121,7 @@ export async function proxy(request: NextRequest) {
 
 
             try {
-                const refreshed = await refreshTokenMiddleware(refreshToken);
+                const refreshed = await refreshTokenMiddleware(refreshToken, sessionToken);
 
                 if(refreshed){
                     requestHeaders.set("x-token-refreshed", "1");
@@ -175,7 +194,7 @@ export async function proxy(request: NextRequest) {
        if(!accessToken || !isValidAccessToken){
         if (refreshToken) {
             try {
-                const refreshed = await refreshTokenMiddleware(refreshToken);
+                const refreshed = await refreshTokenMiddleware(refreshToken, sessionToken);
                 if (refreshed) {
                     return NextResponse.next();
                 }
