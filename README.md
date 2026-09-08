@@ -1,4 +1,4 @@
-# 🏥 HealthCare Client Application
+# 🏥 HealthCare - Enterprise Telemedicine & Healthcare Client Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
@@ -8,281 +8,485 @@
 [![Recharts](https://img.shields.io/badge/Recharts-v3.10-22b5bf?style=for-the-badge)](https://recharts.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-A modern, responsive, enterprise-ready **Telemedicine & Healthcare Frontend Application** built with **Next.js 16 App Router**, **React 19**, **TypeScript**, **Tailwind CSS v4**, and **TanStack React Query v5**.
-
-The client provides dedicated role-based portals for **Patients**, **Doctors**, and **Administrators**, featuring real-time appointment scheduling, Stripe checkout integration, electronic health records (EHR), prescription management, and interactive analytics dashboards.
-
 ---
 
 ## 📑 Table of Contents
 
-- [📌 Overview](#-overview)
-- [✨ Key Features & Modules](#-key-features--modules)
-  - [1. Authentication & Role-Based Access Control (RBAC)](#1-authentication--role-based-access-control-rbac)
-  - [2. Public Consultation & Discovery Portal](#2-public-consultation--discovery-portal)
-  - [3. Appointment Booking & Payment Processing](#3-appointment-booking--payment-processing)
-  - [4. Patient Portal (`/dashboard`)](#4-patient-portal-dashboard)
-  - [5. Doctor Portal (`/doctor/dashboard`)](#5-doctor-portal-doctordashboard)
-  - [6. Admin & Management Portal (`/admin/dashboard`)](#6-admin--management-portal-admindashboard)
-  - [7. UI/UX Design System & Theming](#7-uiux-design-system--theming)
-- [🛠 Tech Stack & Core Libraries](#-tech-stack--core-libraries)
-- [📂 Client Directory Architecture](#-client-directory-architecture)
-- [⚙️ Environment Variables](#️-environment-variables)
-- [🚀 Getting Started](#-getting-started)
-- [🔗 API Integration & Services](#-api-integration--services)
-- [📜 Scripts Reference](#-scripts-reference)
-- [🤝 License](#-license)
+- [1. Executive Summary](#1-executive-summary)
+- [2. System Architecture](#2-system-architecture)
+  - [2.1 High-Level Architecture](#21-high-level-architecture)
+  - [2.2 Project & Directory Layout](#22-project--directory-layout)
+  - [2.3 Data Flow & State Synchronization](#23-data-flow--state-synchronization)
+- [3. Full Tech Stack Specifications](#3-full-tech-stack-specifications)
+- [4. Role-Based Access Control (RBAC) Matrix](#4-role-based-access-control-rbac-matrix)
+  - [4.1 Access Control Matrix](#41-access-control-matrix)
+  - [4.2 Auth Flow & Edge Route Guarding](#42-auth-flow--edge-route-guarding)
+- [5. Feature & Module Deep Dive](#5-feature--module-deep-dive)
+  - [5.1 Public Discovery & Marketing Portal](#51-public-discovery--marketing-portal)
+  - [5.2 Patient Portal (`/dashboard`)](#52-patient-portal-dashboard)
+  - [5.3 Doctor Clinical Workspace (`/doctor/dashboard`)](#53-doctor-clinical-workspace-doctordashboard)
+  - [5.4 Administrator Command Center (`/admin/dashboard`)](#54-administrator-command-center-admindashboard)
+- [6. Environment Variable Configurations](#6-environment-variable-configurations)
+- [7. API & Service Layer Integration](#7-api--service-layer-integration)
+- [8. Installation & Local Development](#8-installation--local-development)
+- [9. Production Build & Deployment](#9-production-build--deployment)
+- [10. Scripts Reference](#10-scripts-reference)
+- [11. License & Acknowledgments](#11-license--acknowledgments)
 
 ---
 
-## 📌 Overview
+## 1. Executive Summary
 
-The **HealthCare Client** is designed to deliver a fast, accessible, and intuitive healthcare experience. It handles all user interactions, state synchronization, form validations, dynamic slot scheduling, token persistence, and role-based views.
+**HealthCare Client** is an enterprise-grade, high-performance web application designed for modern digital healthcare ecosystems. Built atop the cutting-edge **Next.js 16 App Router**, **React 19**, and **Tailwind CSS v4**, this application provides a centralized, omnichannel solution connecting patients, healthcare specialists, clinical administrators, and super-administrators in a secure, compliant, and accessible interface.
 
-### Architectural Highlights:
-- **Next.js 16 App Router**: Leverages Server Components (RSC) and Client Components for optimized data streaming and fast first-contentful paint.
-- **Role Isolation**: Strict route groups isolating public marketing pages, authentication flows, and protected dashboard layouts.
-- **Server State Management**: Powered by **TanStack React Query v5** for optimistic updates, background caching, and automatic refetching.
-- **Type Safety**: End-to-end typing with TypeScript and Zod schema validations for every form.
-- **Dual Theme Support**: Flawless Dark/Light mode switching with tailored Tailwind CSS v4 variables.
-
----
-
-## ✨ Key Features & Modules
-
-### 1. Authentication & Role-Based Access Control (RBAC)
-- **Multi-Role Authentication**: Dedicated routing and layouts tailored to `PATIENT`, `DOCTOR`, `ADMIN`, and `SUPER_ADMIN`.
-- **OTP Verification Flow**: Step-by-step account verification using time-limited 6-digit email OTPs.
-- **Secure Token Handling**: Axios client configured with automatic cookie management, token refresh handling, and credentials forwarding.
-- **Password Recovery & Reset**: Intuitive password reset interface with OTP validation.
-- **Route Guard Middleware**: Protects private routes and intelligently redirects users based on their active role.
-
-### 2. Public Consultation & Discovery Portal
-- **Interactive Home / Landing Page (`/`)**:
-  - Live statistics, specialist highlights, user feedback testimonials, and healthcare pillars.
-- **Doctor Consultation Directory (`/consultation`)**:
-  - Filter doctors by specialty (Cardiology, Neurology, Pediatrics, Orthopedics, etc.).
-  - Search by doctor name, qualification, or experience.
-  - Doctor profile cards displaying ratings, fee per consultation, and real-time availability badges.
-- **Health Information Pages**:
-  - **Health Plans (`/health-plans`)**: Tiered healthcare packages (Individual, Family, Senior, Corporate).
-  - **Diagnostics (`/diagnostics`)**: Lab test catalog, pricing, sample collection info, and health packages.
-  - **Online Pharmacy (`/medicine`)**: Prescription medicine showcase, OTC categories, and delivery details.
-  - **NGOs & Community Healthcare (`/ngos`)**: Subsidized clinical programs, health camps, and charity drives.
-
-### 3. Appointment Booking & Payment Processing
-- **Real-Time Schedule Selector Modal**:
-  - Dynamic calendar date-picker.
-  - Live doctor time-slot selection with conflict prevention.
-- **Stripe Checkout Integration**:
-  - Automatic redirect to Stripe checkout session with breakdown of consultation fees, taxes, and service charges.
-- **Payment Verification & Receipts**:
-  - **Success Screen (`/payment/success`)**: Confirms booked appointment with transaction details and meeting guidelines.
-  - **Cancel / Retry Screen (`/payment/cancel`)**: Clean retry interface for failed or aborted payments.
-
-### 4. Patient Portal (`/dashboard`)
-- **Patient Dashboard Overview**: Summary of upcoming appointments, active prescriptions, and recent doctor interactions.
-- **My Appointments (`/dashboard/my-appointments`)**: Real-time list of scheduled, ongoing, and completed visits with one-click video consultation links.
-- **My Prescriptions (`/dashboard/my-prescriptions`)**: View and download digital prescriptions issued by doctors.
-- **Health Records (`/dashboard/health-record`)**: Comprehensive medical profile tracking blood group, allergies, past diagnoses, and uploaded clinical reports.
-- **Payment History (`/dashboard/payment`)**: Complete ledger of transactions with payment status and receipt details.
-- **Account & Security Settings**: Update profile data, avatar, and change password (`/change-password`).
-
-### 5. Doctor Portal (`/doctor/dashboard`)
-- **Doctor Metrics & KPIs**: Total patients treated, today's appointments count, total earnings, and average rating scores.
-- **Schedule Management (`/doctor/dashboard/my-schedules`)**:
-  - Define weekly and daily consultation hours.
-  - Slot activation, deletion, and real-time status view.
-- **Appointment Operations (`/doctor/dashboard/appointments`)**:
-  - Filter patient visits by status (`SCHEDULED`, `INPROGRESS`, `COMPLETED`, `CANCELED`).
-  - View patient clinical history and launch teleconsultations.
-- **Digital Prescription Issuer (`/doctor/dashboard/prescriptions`)**:
-  - Structured form for diagnosis, medicine names, dosage, instructions, and follow-up advice.
-- **Patient Reviews (`/doctor/dashboard/my-reviews`)**: View feedback and star ratings submitted by treated patients.
-
-### 6. Admin & Management Portal (`/admin/dashboard`)
-- **Analytics Overview**: Visual charts powered by `Recharts` displaying appointment volume, user registrations, and platform revenue.
-- **Doctor Management (`/admin/dashboard/doctors-management`)**:
-  - Onboard verified doctors with registration numbers, specialties, and pricing.
-  - Manage status (active, suspended, soft-deleted).
-- **Patient Management (`/admin/dashboard/patients-management`)**: View registered patients and health profile statuses.
-- **Specialty Management (`/admin/dashboard/specialties-management`)**:
-  - Full CRUD operations for medical specialties with custom icon uploads.
-- **Schedule Master Management (`/admin/dashboard/schedules-management`)**: System-wide slot creation and time-slot scheduling.
-- **Doctor Schedule Assignments (`/admin/dashboard/doctor-schedules-managament`)**: Monitor and assign schedules to specific doctors.
-- **Prescriptions & Appointments Audit**: System-wide clinical audit log.
-- **Financial & Payment Oversight (`/admin/dashboard/payments-management`)**: Transaction history, payment statuses, and gateway payloads.
-
-### 7. UI/UX Design System & Theming
-- **Theme Toggle**: Light and Dark mode using `next-themes` with CSS design tokens.
-- **Shared Components**:
-  - Reusable `DataTable` with server-side/client-side pagination, sorting, and search filtering.
-  - Accessible modals, confirmation dialogs, dropdowns, and badges built on `@base-ui/react` and `shadcn`.
-  - Form validation with `react-hook-form` and `zod`.
-- **Responsive Layout**: Mobile-optimized dashboard sidebars and navigation drawer.
+### Key Value Propositions
+- **Unified Telemedicine Portal**: Streamlined discovery, doctor specialty filtering, dynamic slot booking, and integrated Stripe Checkout.
+- **Role-Segmented Workspaces**: Tailored user experiences with dedicated dashboards for Patients, Doctors, Admins, and Super Admins.
+- **Enterprise-Grade Security**: Dual-layer authorization with JWT access/refresh token rotation, Better-Auth session verification, and edge route guarding via middleware.
+- **Real-Time Clinical Operations**: Automated schedule allocation, digital prescription generation, electronic health records (EHR), and interactive analytic charts.
+- **Adaptive Visual Design**: Custom medical design system with full Light and Dark mode theming powered by CSS tokens and accessible UI primitives.
 
 ---
 
-## 🛠 Tech Stack & Core Libraries
+## 2. System Architecture
 
-| Category | Technology | Purpose |
-|---|---|---|
-| **Framework** | [Next.js 16.3.2](https://nextjs.org/) | App Router, Server Components, Route Handlers |
-| **UI Library** | [React 19.2.8](https://react.dev/) | Component architecture & modern hooks |
-| **Language** | [TypeScript 5](https://www.typescriptlang.org/) | Strict static typing across all modules |
-| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) | Modern utility-first CSS engine |
-| **UI Primitives** | [@base-ui/react](https://base-ui.com/) & [Shadcn UI](https://ui.shadcn.com/) | Accessible, unstyled UI primitives |
-| **Data Fetching** | [TanStack React Query v5](https://tanstack.com/query/latest) | Server-state caching and synchronization |
-| **HTTP Client** | [Axios](https://axios-http.com/) | Custom interceptors, token attaching, and cookie credentials |
-| **Form & Validation** | [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) | High-performance forms with schema validation |
-| **Icons** | [Lucide React](https://lucide.dev/) | Clean, lightweight SVG icon set |
-| **Data Visualization** | [Recharts 3.10](https://recharts.org/) | Responsive charts for admin dashboards |
-| **Date Management** | [date-fns](https://date-fns.org/) & [react-day-picker](https://daypicker.dev/) | Date formatting and calendar scheduling |
-| **Theming** | [next-themes](https://github.com/pacocoursey/next-themes) | Theme switching with zero layout shift |
+### 2.1 High-Level Architecture
+
+```mermaid
+flowchart TD
+    User([End User / Browser])
+    
+    subgraph NextJS_Frontend ["HealthCare-Client (Next.js 16 + React 19)"]
+        Proxy["Edge Route Proxy & Auth Guard (proxy.ts)"]
+        
+        subgraph AppRouter ["App Router (src/app)"]
+            PublicLayout["Public / Marketing Pages (commonLayout)"]
+            AuthPages["Auth Flows (/login, /register, /verify-email)"]
+            PatientPortal["Patient Portal ((patientRouteGroup)/dashboard)"]
+            DoctorPortal["Doctor Workspace (/doctor/dashboard)"]
+            AdminPortal["Admin Command Center (/admin/dashboard)"]
+        end
+        
+        subgraph ClientState ["State & Network Layer"]
+            TanStack["TanStack React Query v5 (Caching & Server State)"]
+            AxiosClient["Axios Interceptor Instance (Token Refresh & Credentials)"]
+            ZodValidation["React Hook Form + Zod Validations"]
+        end
+    end
+    
+    subgraph ExternalServices ["External Infrastructure & Backend"]
+        BackendAPI["Express / Prisma REST API (HealthCare-Server)"]
+        StripeGateway["Stripe Checkout / Webhook Processing"]
+        PostgresDB[("PostgreSQL Database")]
+    end
+
+    User --> Proxy
+    Proxy --> AppRouter
+    AppRouter --> ClientState
+    ClientState --> BackendAPI
+    ClientState --> StripeGateway
+    BackendAPI --> PostgresDB
+```
 
 ---
 
-## 📂 Client Directory Architecture
+### 2.2 Project & Directory Layout
 
 ```text
 HealthCare-Client/
-├── public/                             # Public static assets, logos, brand icons
+├── public/                                  # Static assets, SVG illustrations, logos
 ├── src/
-│   ├── app/                            # Next.js App Router (File-based Routing)
-│   │   ├── (commonLayout)/             # Public layout with Navbar & Footer
-│   │   │   ├── (authRouteGroup)/       # /login, /register, /forget-password, /verify-email
-│   │   │   ├── consultation/           # Doctor consultation search & booking directory
-│   │   │   ├── diagnostics/            # Diagnostic lab tests & health packages
-│   │   │   ├── health-plans/           # Subscription healthcare plans
-│   │   │   ├── medicine/               # Online pharmacy & medicine catalog
-│   │   │   ├── ngos/                   # Community health & NGO medical camps
-│   │   │   └── layout.tsx              # Common layout wrapper
-│   │   ├── (dashboardLayout)/          # Authenticated Layouts (Sidebar + Header)
-│   │   │   ├── admin/dashboard/        # Admin & Super Admin dashboard sub-routes
-│   │   │   ├── doctor/dashboard/       # Doctor clinical workflows & schedule sub-routes
-│   │   │   ├── (patientRouteGroup)/    # Patient health records, visits, payments
-│   │   │   ├── (commonProtectedLayout)/# Shared profile & change password
-│   │   │   └── layout.tsx              # Dashboard layout wrapper
-│   │   ├── globals.css                 # Tailwind v4 theme configuration & color tokens
-│   │   ├── layout.tsx                  # Root HTML shell & global providers
-│   │   ├── loading.tsx                 # Top-level loading state
-│   │   ├── not-found.tsx               # Custom 404 page
-│   │   └── page.tsx                    # Landing page
-│   ├── components/
-│   │   ├── modules/                    # Feature-specific modular components
-│   │   │   ├── auth/                   # LoginForm, RegisterForm, ResetPasswordForm
-│   │   │   ├── consultation/           # BookAppointmentModal, DoctorList
-│   │   │   ├── dashboard/              # AppointmentCharts, Statistics widgets
-│   │   │   └── schedules/              # ScheduleTable, SlotCard, ScheduleModals
-│   │   ├── shared/                     # Cross-cutting reusable components
-│   │   │   ├── Navbar.tsx              # Global responsive header
-│   │   │   ├── Footer.tsx              # Global footer
-│   │   │   ├── DashboardSidebar.tsx    # Role-aware sidebar navigation
-│   │   │   ├── DashboardHeader.tsx     # Dashboard top bar with user profile
-│   │   │   ├── DataTable.tsx           # Generic data table with pagination
-│   │   │   ├── Pagination.tsx          # Pagination controls
-│   │   │   ├── SearchAndFilterBar.tsx  # Dynamic search and filter input
-│   │   │   ├── ThemeToggle.tsx         # Light/Dark mode switcher
-│   │   │   └── DeleteConfirmationModal.tsx # Reusable deletion dialog
-│   │   └── ui/                         # Base UI components (Button, Input, Card, Badge, Dialog)
-│   ├── hooks/                          # Custom React utility hooks
-│   ├── lib/                            # Axios instance, JWT parsing, cookie & token utilities
-│   ├── providers/                      # ReactQueryProvider, ThemeProvider
-│   ├── services/                       # API service layer (auth, doctor, patient, admin, etc.)
-│   ├── types/                          # TypeScript definitions & API response models
-│   ├── utils/                          # Formatting & helper functions
-│   └── zod/                            # Zod schemas for form validations
-├── package.json                        # Project dependencies & scripts
-├── tsconfig.json                       # TypeScript compiler configuration
-└── next.config.ts                      # Next.js build configuration
+│   ├── app/                                 # Next.js App Router file-system routing
+│   │   ├── (commonLayout)/                  # Public layouts (Navbar + Footer)
+│   │   │   ├── consultation/                # Doctor discovery & booking catalog
+│   │   │   ├── diagnostics/                 # Pathology tests & lab packages
+│   │   │   ├── health-plans/                # Subscription health packages
+│   │   │   ├── medicine/                    # Online pharmacy catalog
+│   │   │   ├── ngos/                        # Community healthcare & charity drives
+│   │   │   ├── login/                       # Multi-role authentication page
+│   │   │   ├── register/                    # Patient & doctor onboarding
+│   │   │   ├── verify-email/                # 6-digit OTP email verification
+│   │   │   ├── forget-password/             # Password reset request
+│   │   │   ├── reset-password/              # New password submission
+│   │   │   └── layout.tsx                   # Common layout wrapper
+│   │   ├── (dashboardLayout)/               # Protected dashboard shell (Sidebar + Topbar)
+│   │   │   ├── (commonProtectedLayout)/     # Shared routes (/my-profile, /change-password)
+│   │   │   ├── (patientRouteGroup)/         # Patient workspace
+│   │   │   │   ├── dashboard/               # Patient metrics & quick actions
+│   │   │   │   │   ├── book-appointments/   # Direct appointment wizard
+│   │   │   │   │   ├── health-record/       # EHR: medical conditions, blood group, files
+│   │   │   │   │   ├── my-appointments/     # Active & past consultations
+│   │   │   │   │   ├── my-prescriptions/    # Prescriptions received from doctors
+│   │   │   │   │   └── payment/             # Patient payment ledger
+│   │   │   │   └── payment/                 # Stripe checkout return handlers
+│   │   │   │       ├── success/             # Appointment confirmation screen
+│   │   │   │       └── cancel/              # Payment retry screen
+│   │   │   ├── doctor/                      # Doctor workspace
+│   │   │   │   └── dashboard/               # Clinical summary & KPI cards
+│   │   │   │       ├── appointments/        # Patient appointments & teleconsultation
+│   │   │   │       ├── my-schedules/        # Weekly slot management & activation
+│   │   │   │       ├── my-reviews/          # Patient ratings & feedback
+│   │   │   │       └── prescriptions/       # Digital prescription generator
+│   │   │   └── admin/                       # Administration workspace
+│   │   │       └── dashboard/               # Executive analytics with Recharts
+│   │   │           ├── admins-management/   # Super Admin: Admin user provisioning
+│   │   │           ├── doctors-management/  # Doctor verification & status control
+│   │   │           ├── patients-management/ # Patient user accounts & EHR oversight
+│   │   │           ├── specialties-management/ # Medical specialty taxonomies & icons
+│   │   │           ├── schedules-management/   # Global master schedule creation
+│   │   │           ├── doctor-schedules-managament/ # Doctor slot assignment
+│   │   │           ├── appointments-management/ # System-wide appointment audit
+│   │   │           ├── prescriptions-management/ # Global prescription ledger
+│   │   │           ├── payments-management/ # Transaction history & Stripe ledger
+│   │   │           └── reviews-management/  # Content moderation on doctor reviews
+│   │   ├── globals.css                      # Tailwind v4 theme tokens & color variables
+│   │   ├── layout.tsx                       # Root layout & global providers
+│   │   ├── loading.tsx                      # Top-level route streaming skeleton
+│   │   ├── not-found.tsx                    # Accessible 404 handler
+│   │   └── page.tsx                         # High-impact landing page
+│   ├── components/                          # UI components
+│   │   ├── modules/                         # Feature-specific module components
+│   │   │   ├── auth/                        # LoginForm, RegisterForm, RoleLoginButtons
+│   │   │   ├── consultation/                # DoctorCard, BookAppointmentModal, FilterBar
+│   │   │   ├── dashboard/                   # Analytics charts, QuickStats, SummaryWidgets
+│   │   │   ├── home/                        # HeroSection, FeaturedDoctors, HealthPlans
+│   │   │   └── schedules/                   # ScheduleGrid, SlotPicker, AssignModal
+│   │   ├── shared/                          # Reusable cross-application components
+│   │   │   ├── Navbar.tsx                   # Public navigation header
+│   │   │   ├── Footer.tsx                   # Platform footer with legal & site links
+│   │   │   ├── DashboardSidebar.tsx         # Role-aware expandable navigation sidebar
+│   │   │   ├── DashboardHeader.tsx          # Dashboard topbar with profile dropdown
+│   │   │   ├── DataTable.tsx                # Generic paginated/sortable table component
+│   │   │   ├── Pagination.tsx               # Accessible pagination controls
+│   │   │   ├── SearchAndFilterBar.tsx       # Live debounce search & filter inputs
+│   │   │   ├── ThemeToggle.tsx              # Light / Dark mode switcher
+│   │   │   └── LogoutConfirmModal.tsx       # Confirmation dialog for session termination
+│   │   └── ui/                              # Shadcn & Base-UI primitives (Button, Dialog, etc.)
+│   ├── hooks/                               # Custom hooks (auth, debouncing, media queries)
+│   ├── lib/                                 # Utilities (Axios interceptor, JWT, cookie management)
+│   ├── providers/                           # ReactQueryProvider, ThemeProvider
+│   ├── proxy.ts                             # Next.js edge route protection & middleware logic
+│   ├── services/                            # Strongly-typed API client service methods
+│   ├── types/                               # TypeScript models, DTOs, and interface definitions
+│   └── zod/                                 # Zod validation schemas for all application forms
+├── package.json                             # Dependencies & runtime scripts
+├── tsconfig.json                            # TypeScript configuration
+└── next.config.ts                           # Next.js compiler & domain image whitelist config
 ```
 
 ---
 
-## ⚙️ Environment Variables
+### 2.3 Data Flow & State Synchronization
 
-Create a `.env.local` file in the root of `HealthCare-Client`:
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant View as React 19 Client Component
+    participant Hook as TanStack Query (useQuery / useMutation)
+    participant Service as API Service Layer (Axios)
+    participant Server as HealthCare Backend (Express + Prisma)
+    participant Stripe as Stripe Gateway
 
-```env
-# Backend API Base URL
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+    User->>View: Selects Doctor Slot & Clicks "Book Appointment"
+    View->>Hook: Trigger appointment creation mutation
+    Hook->>Service: appointmentServices.createAppointment(payload)
+    Service->>Server: POST /api/v1/appointments (Bearer JWT in cookie)
+    Server->>Stripe: Create Stripe Checkout Session
+    Stripe-->>Server: session_url & sessionId
+    Server-->>Service: { success: true, data: { paymentUrl } }
+    Service-->>Hook: Return payment URL
+    Hook-->>View: Redirect User to Stripe Checkout
+    User->>Stripe: Completes Payment
+    Stripe-->>User: Redirect to /payment/success?session_id=...
+```
 
-# Better-Auth Endpoint URL
+---
+
+## 3. Full Tech Stack Specifications
+
+| Layer / Category | Technology | Version | Purpose & Rationale |
+|---|---|---|---|
+| **Core Framework** | [Next.js](https://nextjs.org/) | `16.3.2` | App Router architecture, Server Components, Streaming SSR, Edge Route Proxy |
+| **UI Library** | [React](https://react.dev/) | `19.2.8` | Modern declarative UI, Concurrent features, Action hooks |
+| **Type System** | [TypeScript](https://www.typescriptlang.org/) | `^5.0.0` | Strict type safety across components, service layers, and DTOs |
+| **CSS & Design Engine** | [Tailwind CSS](https://tailwindcss.com/) | `v4.0.0` | Next-generation CSS-first styling engine with customized HSL variables |
+| **UI Primitives** | [@base-ui/react](https://base-ui.com/) & [Shadcn](https://ui.shadcn.com/) | `^1.7.0` | WAI-ARIA compliant, unstyled, fully accessible dialogs, popovers, and menus |
+| **Asynchronous State** | [TanStack React Query](https://tanstack.com/query) | `^5.102.3` | Server state caching, optimistic UI updates, automated background invalidation |
+| **HTTP Client** | [Axios](https://axios-http.com/) | `^1.19.0` | Customized client with credential forwarding, request/response interceptors |
+| **Form Management** | [React Hook Form](https://react-hook-form.com/) | `^7.86.0` | Uncontrolled high-performance form state with minimal re-renders |
+| **Schema Validation** | [Zod](https://zod.dev/) | `^4.4.3` | Schema definition and client-side validation parsing for all forms |
+| **Data Visualization** | [Recharts](https://recharts.org/) | `^3.10.1` | Responsive SVG charts (Line, Bar, Area, Pie) for administrator analytics |
+| **Date & Scheduling** | [date-fns](https://date-fns.org/) & [react-day-picker](https://daypicker.dev/) | `^4.4.0` | Timezone formatting, calendar day pickers, time-slot conflict calculations |
+| **Icons & Visuals** | [Lucide React](https://lucide.dev/) | `^1.34.0` | Cohesive, lightweight SVG icon package |
+| **Theme Management** | [next-themes](https://github.com/pacocoursey/next-themes) | `^0.4.6` | Flawless dark/light mode switching with zero layout shift |
+| **Token Verification** | [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) | `^9.0.3` | Decodes JWT payload at middleware edge for instant role routing |
+
+---
+
+## 4. Role-Based Access Control (RBAC) Matrix
+
+The application implements a strict, multi-tiered access control model across five distinct permission tiers: **Guest**, **Patient**, **Doctor**, **Admin**, and **Super Admin**.
+
+### 4.1 Access Control Matrix
+
+| Route / Module Path | Guest | Patient | Doctor | Admin | Super Admin | Description |
+|---|:---:|:---:|:---:|:---:|:---:|---|
+| `/` (Landing Page) | ✅ | ✅ | ✅ | ✅ | ✅ | Public overview, featured doctors, testimonials |
+| `/consultation` | ✅ | ✅ | ✅ | ✅ | ✅ | Doctor catalog & specialty directory |
+| `/diagnostics`, `/health-plans`, `/medicine`, `/ngos` | ✅ | ✅ | ✅ | ✅ | ✅ | Public health discovery content |
+| `/login`, `/register`, `/verify-email` | ✅ | 🔄 *(Redirect)* | 🔄 *(Redirect)* | 🔄 *(Redirect)* | 🔄 *(Redirect)* | Auth pages (authenticated users auto-redirected to dashboard) |
+| `/my-profile`, `/change-password` | ❌ | ✅ | ✅ | ✅ | ✅ | Common authenticated user account management |
+| `/dashboard` (Patient Home) | ❌ | ✅ | ❌ | ❌ | ❌ | Patient appointment summary & health stats |
+| `/dashboard/book-appointments` | ❌ | ✅ | ❌ | ❌ | ❌ | Direct booking & appointment workflow |
+| `/dashboard/my-appointments` | ❌ | ✅ | ❌ | ❌ | ❌ | Patient appointment history & teleconsultation links |
+| `/dashboard/my-prescriptions` | ❌ | ✅ | ❌ | ❌ | ❌ | Digital prescriptions received by patient |
+| `/dashboard/health-record` | ❌ | ✅ | ❌ | ❌ | ❌ | Patient personal electronic health record (EHR) |
+| `/dashboard/payment` | ❌ | ✅ | ❌ | ❌ | ❌ | Patient transaction and receipt ledger |
+| `/doctor/dashboard` | ❌ | ❌ | ✅ | ❌ | ❌ | Doctor clinical overview & KPI analytics |
+| `/doctor/dashboard/appointments` | ❌ | ❌ | ✅ | ❌ | ❌ | Doctor patient queue & consultation room |
+| `/doctor/dashboard/my-schedules` | ❌ | ❌ | ✅ | ❌ | ❌ | Doctor consultation slot configuration |
+| `/doctor/dashboard/prescriptions` | ❌ | ❌ | ✅ | ❌ | ❌ | Clinical prescription issuance tool |
+| `/doctor/dashboard/my-reviews` | ❌ | ❌ | ✅ | ❌ | ❌ | Patient reviews and rating feedback |
+| `/admin/dashboard` | ❌ | ❌ | ❌ | ✅ | ✅ | Executive revenue & appointment analytics |
+| `/admin/dashboard/doctors-management` | ❌ | ❌ | ❌ | ✅ | ✅ | Doctor credential verification & suspension |
+| `/admin/dashboard/patients-management` | ❌ | ❌ | ❌ | ✅ | ✅ | Patient accounts & health record overview |
+| `/admin/dashboard/specialties-management` | ❌ | ❌ | ❌ | ✅ | ✅ | CRUD operations for medical specialties |
+| `/admin/dashboard/schedules-management` | ❌ | ❌ | ❌ | ✅ | ✅ | Master time slot generator |
+| `/admin/dashboard/doctor-schedules-managament` | ❌ | ❌ | ❌ | ✅ | ✅ | Slot assignment to registered doctors |
+| `/admin/dashboard/payments-management` | ❌ | ❌ | ❌ | ✅ | ✅ | System-wide Stripe transaction audit |
+| `/admin/dashboard/reviews-management` | ❌ | ❌ | ❌ | ✅ | ✅ | Content moderation of patient reviews |
+| `/admin/dashboard/admins-management` | ❌ | ❌ | ❌ | ❌ | ✅ | **Super Admin only**: Provision new administrators |
+
+---
+
+### 4.2 Auth Flow & Edge Route Guarding
+
+Route security is enforced on every incoming request through `src/proxy.ts` (Next.js Middleware proxy):
+
+1. **Token Extraction**: Middleware inspects `accessToken`, `refreshToken`, and Better-Auth session tokens from HTTP cookies.
+2. **Signature & Expiry Check**: Evaluates token validity against `JWT_ACCESS_SECRET`. If the token is near expiration, it triggers an automated proactive refresh against `/auth/refresh-token`.
+3. **Role Validation**: If an unauthenticated user attempts to access protected routes, they are redirected to `/login?redirect=<path>`. If an authenticated user attempts to access a forbidden role route (e.g. Patient accessing `/admin/dashboard`), they are safely redirected to their default role dashboard.
+
+---
+
+## 5. Feature & Module Deep Dive
+
+### 5.1 Public Discovery & Marketing Portal
+- **Interactive Hero & Role Launcher**: Quick-login buttons for testing (`Patient`, `Doctor`, `Admin`), search-by-specialty shortcuts, and platform statistics.
+- **Doctor Consultation Directory (`/consultation`)**:
+  - Live search by doctor name, qualification, and specialty.
+  - Interactive doctor profile card featuring experience, consultation fee, and available slots.
+- **Specialized Services Showcase**:
+  - **Health Plans (`/health-plans`)**: Individual, family, and corporate subscription tiers.
+  - **Diagnostics (`/diagnostics`)**: Comprehensive lab test directory with home sample collection details.
+  - **Online Pharmacy (`/medicine`)**: Prescription medicine showcase and wellness categories.
+  - **Community NGOs (`/ngos`)**: Non-profit health drives and subsidized treatment centers.
+
+---
+
+### 5.2 Patient Portal (`/dashboard`)
+- **Executive Patient Dashboard**: Active consultations summary, prescription counts, and recent transactions.
+- **Appointment Lifecycle**:
+  - Direct booking modal with dynamic date picker and conflict-free time slots.
+  - Real-time status indicators (`SCHEDULED`, `INPROGRESS`, `COMPLETED`, `CANCELED`).
+  - Seamless Stripe payment checkout flow.
+- **Electronic Health Record (EHR)**:
+  - Personal health indicators: Blood group, allergies, past medical conditions, ongoing treatments, and clinical document uploads.
+- **Digital Prescriptions**:
+  - Clean view and PDF print capabilities for medications, instructions, dosages, and follow-up dates.
+
+---
+
+### 5.3 Doctor Clinical Workspace (`/doctor/dashboard`)
+- **Clinical Performance Analytics**: KPI indicators for treated patients, today's schedule, total earnings, and rating averages.
+- **Schedule Management (`/doctor/dashboard/my-schedules`)**:
+  - View assigned time slots.
+  - Enable or disable availability per day/week with instant database sync.
+- **Consultation Room & Appointments**:
+  - Patient queue with quick access to patient medical histories.
+  - One-click prescription issuance interface.
+- **Digital Prescription Generator**:
+  - Multi-item medication form with dosage intervals, before/after meal rules, and clinical instructions.
+
+---
+
+### 5.4 Administrator Command Center (`/admin/dashboard`)
+- **Executive Analytics Engine**:
+  - Visual charts rendered via `Recharts` for revenue growth, appointment breakdown, and user onboarding trends.
+- **Doctor & Staff Administration**:
+  - Review medical licenses, approve doctor registrations, set specializations, and manage operational statuses.
+- **Specialty & Catalog Taxonomy**:
+  - Create, update, or remove medical departments with custom icon URLs.
+- **Master Scheduling Engine**:
+  - Generate bulk time slots across daily intervals and assign slots to medical staff.
+- **Super-Admin Governance**:
+  - Dedicated `/admin/dashboard/admins-management` view to provision and audit administrative staff.
+
+---
+
+## 6. Environment Variable Configurations
+
+Create a `.env.local` file in the root of the project:
+
+```bash
+# ==============================================================================
+# BACKEND API & AUTHENTICATION CONFIGURATION
+# ==============================================================================
+
+# Base URL for the HealthCare REST API (Express / Node.js backend)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api/v1
+
+# Base URL for Better-Auth authentication endpoints
 NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:5000/api/auth
 
-# Stripe Publishable Key
+# Secret key used to decode & verify JWT access tokens at Next.js Edge Middleware
+# (Must match the JWT_ACCESS_SECRET configured in HealthCare-Server)
+JWT_ACCESS_SECRET=your_super_secret_jwt_access_key_here
+
+# ==============================================================================
+# PAYMENT GATEWAY (STRIPE)
+# ==============================================================================
+
+# Stripe Publishable Key for client-side checkout redirection
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
 ```
 
+### Environment Variable Matrix
+
+| Variable | Required | Scope | Description | Default / Example |
+|---|:---:|:---:|---|---|
+| `NEXT_PUBLIC_API_BASE_URL` | **Yes** | Client & Server | Base endpoint for backend CRUD APIs | `http://localhost:5000/api/v1` |
+| `NEXT_PUBLIC_BETTER_AUTH_URL`| **Yes** | Client & Server | Auth endpoint for Better-Auth sessions | `http://localhost:5000/api/auth` |
+| `JWT_ACCESS_SECRET` | **Yes** | Server / Edge | Secret used to decrypt JWT in middleware | `32+ characters secret` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | **Optional** | Client | Public Stripe key for checkout initialization | `pk_test_...` |
+
 ---
 
-## 🚀 Getting Started
+## 7. API & Service Layer Integration
+
+The application utilizes a modular API service layer located in `src/services/`. Every service function is strongly typed and interfaces with the centralized Axios instance (`src/lib/axios/axiosInstance.ts`):
+
+```text
+src/services/
+├── auth.services.ts          # Login, register, logout, OTP verify, password recovery
+├── doctor.services.ts        # Doctor directory, search, profile details, updates
+├── schedule.services.ts      # Slot generation, doctor availability, assignments
+├── appointment.services.ts   # Booking creation, status updates, patient visits
+├── prescription.services.ts  # Clinical prescription creation & retrieval
+├── specialty.services.ts     # Specialty CRUD operations & category taxonomies
+├── patient.services.ts       # Health records, medical profile updates
+├── review.services.ts        # Patient rating submissions & moderation
+├── admin.services.ts         # Administrative operations (doctors, patients, admins)
+├── stats.services.ts         # KPI metrics, platform revenue, dashboard aggregates
+└── rag.services.ts           # AI / Knowledge retrieval assistant integrations
+```
+
+### Service Invocation Pattern Example
+
+```typescript
+// Example: Querying Doctor Appointments with TanStack Query
+import { useQuery } from "@tanstack/react-query";
+import { appointmentServices } from "@/services/appointment.services";
+
+export function useDoctorAppointments(params?: Record<string, any>) {
+  return useQuery({
+    queryKey: ["doctor-appointments", params],
+    queryFn: async () => {
+      const response = await appointmentServices.getDoctorAppointments(params);
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+  });
+}
+```
+
+---
+
+## 8. Installation & Local Development
 
 ### Prerequisites
-- **Node.js**: `v20.x` or later
-- **Package Manager**: `pnpm` (recommended), `yarn`, or `npm`
-- **Backend Server**: Ensure `HealthCare-Server` is running on `http://localhost:5000`
+- **Node.js**: `v20.x` or higher (LTS recommended)
+- **Package Manager**: `pnpm` (`v11.x` recommended), `yarn`, or `npm`
+- **Backend Service**: Ensure `HealthCare-Server` is running on `http://localhost:5000`
 
 ---
 
-### Installation & Run
+### Step-by-Step Setup
 
-1. **Navigate to the client directory**:
+1. **Clone the repository**:
    ```bash
+   git clone https://github.com/rasel754/HealthCare-Client.git
    cd HealthCare-Client
    ```
 
-2. **Install dependencies**:
+2. **Install project dependencies**:
    ```bash
    pnpm install
-   # or
-   yarn install
-   # or
-   npm install
    ```
 
-3. **Start the development server**:
+3. **Configure environment variables**:
+   ```bash
+   cp .env.example .env.local
+   # Update the values in .env.local with your backend configuration
+   ```
+
+4. **Run the development server**:
    ```bash
    pnpm dev
-   # or
-   yarn dev
    ```
 
-4. **Access the application**:
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. **Open the application**:
+   Navigate to [http://localhost:3000](http://localhost:3000) in your web browser.
 
 ---
 
-## 🔗 API Integration & Services
+## 9. Production Build & Deployment
 
-The client communicates with the backend via modular service modules located in `src/services/`:
+### 9.1 Production Build
 
-| Service File | Domain | Key Responsibilities |
+To validate TypeScript types, build production assets, and optimize bundles:
+
+```bash
+# 1. Run ESLint checks
+pnpm lint
+
+# 2. Compile and optimize production bundle
+pnpm build
+
+# 3. Launch optimized production server
+pnpm start
+```
+
+### 9.2 Deployment Recommendations
+
+- **Vercel (Recommended)**:
+  1. Import the repository into Vercel.
+  2. Framework Preset will automatically detect **Next.js**.
+  3. Add environment variables (`NEXT_PUBLIC_API_BASE_URL`, `JWT_ACCESS_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`).
+  4. Deploy with automatic CI/CD and Edge Middleware support.
+
+- **Docker Containerization**:
+  The Next.js build can be packaged using standard standalone Node.js output (`output: 'standalone'` in `next.config.ts`).
+
+---
+
+## 10. Scripts Reference
+
+| Script | Command | Purpose |
 |---|---|---|
-| `auth.services.ts` | Authentication | Register, login, logout, verify email, forget password, reset password, get current user (`/me`) |
-| `doctor.services.ts` | Doctor Directory | Fetch doctors with specialty filters, fetch doctor profiles, doctor profile updates |
-| `schedule.services.ts` | Schedules | Create time slots, fetch doctor schedules, delete slots, assign schedules |
-| `appointment.services.ts` | Appointments | Book appointment, fetch patient appointments, fetch doctor appointments, update status |
-| `prescription.services.ts`| Prescriptions | Create digital prescriptions, fetch doctor/patient prescription records |
-| `specialty.services.ts` | Specialties | Fetch specialties, create/update/delete medical specialty categories |
-| `patient.services.ts` | Patient Profile | Retrieve and update patient medical records and health profile |
-| `review.services.ts` | Reviews | Fetch and submit doctor ratings and reviews |
-| `admin.services.ts` | Administration | Manage doctors, manage patients, oversee system records |
-| `stats.services.ts` | Analytics | Fetch platform KPI counts, revenue data, and graph metrics |
+| `dev` | `next dev` | Launches local development server with Hot Module Replacement (HMR) on port `3000` |
+| `build` | `next build` | Compiles the Next.js application for production deployment |
+| `start` | `next start` | Runs the compiled production server |
+| `lint` | `eslint` | Analyzes code for quality, syntax errors, and Next.js best practices |
 
 ---
 
-## 📜 Scripts Reference
-
-| Command | Description |
-|---|---|
-| `pnpm dev` | Starts the Next.js development server on port `3000` with hot reloading |
-| `pnpm build` | Compiles and builds the production bundle |
-| `pnpm start` | Launches the production server after building |
-| `pnpm lint` | Runs ESLint to check for code quality and syntax errors |
-
----
-
-## 🤝 License
+## 11. License & Acknowledgments
 
 This project is licensed under the **MIT License**.
+
+- Built with [Next.js](https://nextjs.org/) & [React](https://react.dev/).
+- Styled with [Tailwind CSS v4](https://tailwindcss.com/) & [Lucide Icons](https://lucide.dev/).
+- Primitives powered by [Shadcn UI](https://ui.shadcn.com/) & [Base UI](https://base-ui.com/).
+- Charts powered by [Recharts](https://recharts.org/).
