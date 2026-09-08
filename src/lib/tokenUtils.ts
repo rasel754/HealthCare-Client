@@ -35,12 +35,12 @@ export const setTokenInCookies = async (
 }
 
 
-export async function isTokenExpiringSoon(token: string, thresholdInSeconds = 300) : Promise<boolean> {
+export const isTokenExpiringSoon = (token: string, thresholdInSeconds = 300): boolean => {
     const remainingSeconds = getTokenSecondsRemaining(token);
     return remainingSeconds > 0 && remainingSeconds <= thresholdInSeconds;
-}
+};
 
-export async function isTokenExpired(token: string) : Promise<boolean> {
+export const isTokenExpired = (token: string): boolean => {
     const remainingSeconds = getTokenSecondsRemaining(token);
     return remainingSeconds === 0;
-}
+};

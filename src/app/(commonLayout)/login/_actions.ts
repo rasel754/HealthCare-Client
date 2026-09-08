@@ -8,7 +8,16 @@ import { ILoginResponse } from "@/src/types/auth.type";
 import { ILoginPayload, loginZodSchema } from "@/src/zod/auth.validation";
 import { redirect } from "next/navigation";
 
-export const loginAction = async (payload : ILoginPayload, redirectPath ?: string ) : Promise<ILoginResponse | ApiErrorResponse> =>{
+export interface ILoginActionResult {
+    success: boolean;
+    message: string;
+    data?: ILoginResponse;
+    targetPath?: string;
+    needEmailVerify?: boolean;
+    email?: string;
+}
+
+export const loginAction = async (payload : ILoginPayload, redirectPath ?: string ) : Promise<ILoginActionResult> =>{
     const parsedPayload = loginZodSchema.safeParse(payload);
 
     if(!parsedPayload.success){
@@ -19,29 +28,28 @@ export const loginAction = async (payload : ILoginPayload, redirectPath ?: strin
         }
     }
     try {
+        const response = await httpClient.post<ILoginResponse>("/auth/login", parsedPayload.data, { skipAuth: true });
 
-        const response = await httpClient.post<ILoginResponse>("/auth/login", parsedPayload.data);
-
-        const { accessToken, refreshToken, token, user} = response.data;
-        const {role, emailVerified, needPasswordChange, email} = user;
+        const { accessToken, refreshToken, token, user } = response.data;
+        const { role, needPasswordChange, email } = user;
         await setTokenInCookies("accessToken", accessToken);
         await setTokenInCookies("refreshToken", refreshToken);
         await setTokenInCookies("better-auth.session_token", token, 24 * 60 * 60); // 1 day in seconds
 
-        // if(!emailVerified){
-        //     redirect("/verify-email");
-        // }else // in the catch block
-            
-        if(needPasswordChange){
-            //TODO : refactoring
-            redirect(`/reset-password?email=${email}`);
-        }else{
-            // redirect(redirectPath || "/dashboard");
-            const targetPath = redirectPath && isValidRedirectForRole(redirectPath, role as UserRole) ? redirectPath : getDefaultDashboardRoute(role as UserRole);
+        let targetPath = redirectPath && isValidRedirectForRole(redirectPath, role as UserRole)
+            ? redirectPath
+            : getDefaultDashboardRoute(role as UserRole);
 
-            
-            redirect(targetPath);
+        if (needPasswordChange) {
+            targetPath = `/reset-password?email=${encodeURIComponent(email)}`;
         }
+
+        return {
+            success: true,
+            message: "Login successful",
+            data: response.data,
+            targetPath,
+        };
         
     } catch (error : any) {
         if(error && typeof error === "object" && "digest" in error && typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")){
@@ -49,7 +57,12 @@ export const loginAction = async (payload : ILoginPayload, redirectPath ?: strin
         }
 
         if (error && error.response && error.response.data?.message === "Email not verified") {
-            redirect(`/verify-email?email=${payload.email}`);
+            return {
+                success: false,
+                needEmailVerify: true,
+                email: payload.email,
+                message: "Email not verified",
+            };
         }
 
         if (error?.code === "ECONNREFUSED") {
@@ -63,6 +76,6 @@ export const loginAction = async (payload : ILoginPayload, redirectPath ?: strin
         return {
             success: false,
             message: serverErrorMessage,
-        }
+        };
     }
 }

@@ -52,7 +52,11 @@ export default function DashboardContainer({ children }: { children: React.React
 
   return (
     <div className="min-h-screen flex bg-background text-foreground transition-colors">
-      <DashboardSidebar user={user} onLogout={() => logoutMutation.mutate()} />
+      <DashboardSidebar
+        user={user}
+        onLogout={() => logoutMutation.mutate()}
+        isLoggingOut={logoutMutation.isPending}
+      />
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader user={user} />
         <main className="flex-1 p-6 md:p-8 overflow-y-auto">{children}</main>

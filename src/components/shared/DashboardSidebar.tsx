@@ -19,19 +19,27 @@ import {
   Lock,
   PlusCircle,
 } from "lucide-react";
+import { useState } from "react";
 import { Role, IUser } from "@/src/types/auth.type";
+import LogoutConfirmModal from "@/src/components/shared/LogoutConfirmModal";
 
 interface SidebarProps {
   user: IUser | null;
   onLogout: () => void;
+  isLoggingOut?: boolean;
 }
 
-export default function DashboardSidebar({ user, onLogout }: SidebarProps) {
+export default function DashboardSidebar({ user, onLogout, isLoggingOut = false }: SidebarProps) {
   const pathname = usePathname();
-  const role = user?.role;
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const activeRole = user?.role || (
+    pathname.startsWith("/admin") ? (user?.role === Role.SUPER_ADMIN ? Role.SUPER_ADMIN : Role.ADMIN) :
+    pathname.startsWith("/doctor") ? Role.DOCTOR :
+    Role.PATIENT
+  );
 
   const getRoleLinks = () => {
-    if (role === Role.SUPER_ADMIN || role === Role.ADMIN) {
+    if (activeRole === Role.SUPER_ADMIN || activeRole === Role.ADMIN) {
       return [
         { href: "/admin/dashboard", label: "Dashboard Overview", icon: LayoutDashboard },
         { href: "/admin/dashboard/doctors-management", label: "Doctors Directory", icon: Stethoscope },
@@ -42,13 +50,13 @@ export default function DashboardSidebar({ user, onLogout }: SidebarProps) {
         { href: "/admin/dashboard/prescriptions-management", label: "Prescriptions", icon: FileText },
         { href: "/admin/dashboard/payments-management", label: "Payments & Financials", icon: Settings },
         { href: "/admin/dashboard/reviews-management", label: "Reviews & Ratings", icon: Star },
-        ...(role === Role.SUPER_ADMIN
+        ...(activeRole === Role.SUPER_ADMIN || user?.role === Role.SUPER_ADMIN
           ? [{ href: "/admin/dashboard/admins-management", label: "Admins Management", icon: ShieldCheck }]
           : []),
       ];
     }
 
-    if (role === Role.DOCTOR) {
+    if (activeRole === Role.DOCTOR) {
       return [
         { href: "/doctor/dashboard", label: "Doctor Dashboard", icon: LayoutDashboard },
         { href: "/doctor/dashboard/appointments", label: "Patient Appointments", icon: Calendar },
@@ -87,15 +95,28 @@ export default function DashboardSidebar({ user, onLogout }: SidebarProps) {
         </Link>
 
         {/* User Badge */}
-        <div className="bg-muted/50 border border-border rounded-xl p-3 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg uppercase">
-            {user?.name ? user.name[0] : "U"}
-          </div>
+        <Link
+          href="/my-profile"
+          className="bg-muted/50 hover:bg-muted/80 border border-border rounded-2xl p-3 flex items-center gap-3 transition-colors group"
+        >
+          {user?.image || user?.profilePhoto || user?.patient?.profilePhoto || user?.doctor?.profilePhoto ? (
+            <img
+              src={user.image || user.profilePhoto || user.patient?.profilePhoto || user.doctor?.profilePhoto}
+              alt={user.name || "User"}
+              className="h-10 w-10 rounded-full object-cover ring-1 ring-border shrink-0"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg uppercase shrink-0">
+              {(user?.name || user?.patient?.name || user?.doctor?.name || user?.email || "U")[0].toUpperCase()}
+            </div>
+          )}
           <div className="overflow-hidden">
-            <p className="font-semibold text-sm text-foreground truncate">{user?.name || "User"}</p>
-            <p className="text-xs text-primary font-medium uppercase tracking-wider">{user?.role || "PATIENT"}</p>
+            <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+              {user?.name || user?.patient?.name || user?.doctor?.name || user?.admin?.name || (activeRole === Role.SUPER_ADMIN ? "Super Admin" : activeRole === Role.ADMIN ? "Admin" : activeRole === Role.DOCTOR ? "Doctor" : "Patient")}
+            </p>
+            <p className="text-xs text-primary font-bold uppercase tracking-wider">{user?.role || activeRole}</p>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation Group */}
         <nav className="space-y-1">
@@ -145,12 +166,21 @@ export default function DashboardSidebar({ user, onLogout }: SidebarProps) {
 
       {/* Logout Button */}
       <button
-        onClick={onLogout}
+        onClick={() => setIsLogoutModalOpen(true)}
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors mt-6 cursor-pointer"
       >
         <LogOut className="h-4 w-4" />
         <span>Logout Account</span>
       </button>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={onLogout}
+        isLoading={isLoggingOut}
+        userName={user?.name || user?.patient?.name || user?.doctor?.name || user?.admin?.name}
+      />
     </aside>
   );
 }

@@ -11,6 +11,7 @@ import { IDashboardStats, IAppointment } from "@/src/types/domain.types";
 import { Role } from "@/src/types/auth.type";
 import { Button } from "@/src/components/ui/button";
 import { AppointmentCharts } from "@/src/components/modules/dashboard/AppointmentCharts";
+import MedicalLoader from "@/src/components/shared/MedicalLoader";
 import {
   Calendar,
   FileText,
@@ -64,12 +65,13 @@ export default function PatientDashboardPage() {
     });
   };
 
-  const { data: userResponse } = useQuery({
+  const { data: userResponse, isLoading: isUserLoading } = useQuery({
     queryKey: ["me"],
     queryFn: () => getMeService(),
   });
 
   const user = userResponse && "data" in userResponse ? userResponse.data : null;
+  const isPatient = Boolean(user && user.role === Role.PATIENT);
 
   useEffect(() => {
     if (user) {
@@ -84,11 +86,13 @@ export default function PatientDashboardPage() {
   const { data: statsResponse } = useQuery({
     queryKey: ["stats"],
     queryFn: () => getDashboardStatsService(),
+    enabled: isPatient,
   });
 
   const { data: appointmentsResponse, isLoading: isAppointmentsLoading } = useQuery({
     queryKey: ["patient-all-appointments"],
     queryFn: () => getMyAppointmentsService(),
+    enabled: isPatient,
   });
 
   const stats = (statsResponse && "data" in statsResponse ? statsResponse.data : {}) as IDashboardStats;
@@ -97,6 +101,18 @@ export default function PatientDashboardPage() {
   const upcomingAppointment = appointments.find((a) => a.status === "SCHEDULED");
 
   const allCollapsed = Object.values(openSections).every((val) => !val);
+
+  if (isUserLoading || (user && user.role !== Role.PATIENT)) {
+    return (
+      <MedicalLoader
+        variant="fullscreen"
+        title={user && user.role !== Role.PATIENT ? "Redirecting to Dashboard..." : "Loading Patient Portal..."}
+        subtitle={user && user.role !== Role.PATIENT ? `Switching to ${user.role} workspace` : "Loading your health records & appointments"}
+        icon="activity"
+        showECG={true}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

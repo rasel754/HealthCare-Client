@@ -399,7 +399,7 @@ export default function MyProfilePage() {
       {/* Profile Overview Card */}
       <div className="bg-card text-card-foreground rounded-3xl border border-border overflow-hidden shadow-xs">
         {/* Banner Strip */}
-        <div className="h-28 bg-gradient-to-r from-primary/80 via-primary to-indigo-600/90 relative">
+        <div className="h-28 bg-gradient-to-r from-slate-900 via-indigo-950 to-teal-950 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 relative">
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <span className="bg-background/85 backdrop-blur-md text-foreground text-xs font-extrabold px-3 py-1 rounded-full uppercase shadow-xs border border-border">
               {user?.role}

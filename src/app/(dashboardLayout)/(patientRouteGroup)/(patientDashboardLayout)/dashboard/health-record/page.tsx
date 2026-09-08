@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMeService } from "@/src/services/auth.services";
 import { updateMyProfileService } from "@/src/services/patient.services";
@@ -10,7 +10,6 @@ import { Label } from "@/src/components/ui/label";
 import { Gender, BloodGroup, MaritalStatus } from "@/src/types/auth.type";
 import { User, Phone, MapPin, Activity, FileUp, CheckCircle2, AlertCircle } from "lucide-react";
 import { ClinicalProfileSkeleton } from "@/src/components/shared/ClinicalSkeleton";
-
 
 export default function HealthRecordPage() {
   const queryClient = useQueryClient();
@@ -23,11 +22,12 @@ export default function HealthRecordPage() {
   });
 
   const user = userResponse && "data" in userResponse ? userResponse.data : null;
+  const patient = user?.patient;
 
   // Form State
-  const [name, setName] = useState(user?.name || "");
-  const [contactNumber, setContactNumber] = useState(user?.contactNumber || "");
-  const [address, setAddress] = useState(user?.address || "");
+  const [name, setName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [address, setAddress] = useState("");
   const [gender, setGender] = useState<string>(Gender.MALE);
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [bloodGroup, setBloodGroup] = useState<string>(BloodGroup.O_POSITIVE);
@@ -38,6 +38,26 @@ export default function HealthRecordPage() {
   const [hasDiabetes, setHasDiabetes] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [medicalReportFiles, setMedicalReportFiles] = useState<FileList | null>(null);
+
+  // Synchronize when user data loads
+  useEffect(() => {
+    if (!user) return;
+    setName(patient?.name || user.name || "");
+    setContactNumber(patient?.contactNumber || user.contactNumber || "");
+    setAddress(patient?.address || user.address || "");
+
+    if (patient?.patientHealthData) {
+      const hd = patient.patientHealthData;
+      setGender(hd.gender || Gender.MALE);
+      setBloodGroup(hd.bloodGroup || BloodGroup.O_POSITIVE);
+      setDateOfBirth(hd.dateOfBirth ? hd.dateOfBirth.split("T")[0] : "");
+      setHeight(hd.height || "");
+      setWeight(hd.weight || "");
+      setMaritalStatus(hd.maritalStatus || MaritalStatus.UNMARRIED);
+      setHasAllergies(Boolean(hd.hasAllergies));
+      setHasDiabetes(Boolean(hd.hasDiabetes));
+    }
+  }, [user, patient]);
 
   const updateProfileMutation = useMutation({
     mutationFn: updateMyProfileService,

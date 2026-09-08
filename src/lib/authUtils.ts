@@ -14,27 +14,27 @@ export type RouteConfig = {
 
 export const commonProtectedRoutes : RouteConfig = {
     exact : ["/my-profile", "/change-password"],
-    pattern : []
+    pattern : [/^\/my-profile(\/.*)?$/, /^\/change-password(\/.*)?$/]
 }
 
 export const doctorProtectedRoutes : RouteConfig = {
-    pattern: [/^\/doctor\/dashboard/ ], // Matches any path that starts with /doctor/dashboard
-    exact : []
+    pattern: [/^\/doctor\/dashboard(\/.*)?$/],
+    exact : ["/doctor/dashboard"]
 }
 
 export const adminProtectedRoutes : RouteConfig = {
-    pattern: [/^\/admin\/dashboard/ ], // Matches any path that starts with /admin/dashboard
-    exact : []
+    pattern: [/^\/admin\/dashboard(\/.*)?$/],
+    exact : ["/admin/dashboard"]
 }
 
 export const superAdminProtectedRoutes : RouteConfig = {
     exact : ["/admin/dashboard/admins-management"],
-    pattern : []
+    pattern : [/^\/admin\/dashboard\/admins-management(\/.*)?$/]
 }
 
 export const patientProtectedRoutes : RouteConfig = {
-    pattern: [/^\/dashboard/ ], // Matches any path that starts with /dashboard
-    exact : [ "/payment/success"]
+    pattern: [/^\/dashboard(\/.*)?$/],
+    exact : ["/dashboard", "/payment/success"]
 };
 
 export const isRouteMatches = (pathname : string, routes : RouteConfig) => {
@@ -45,6 +45,10 @@ export const isRouteMatches = (pathname : string, routes : RouteConfig) => {
 }
 
 export const getRouteOwner = (pathname : string) : "SUPER_ADMIN" | "ADMIN" | "DOCTOR" | "PATIENT" | "COMMON" | null => {
+    if(isRouteMatches(pathname, commonProtectedRoutes)) {
+        return "COMMON";
+    }
+
     if(isRouteMatches(pathname, superAdminProtectedRoutes)) {
         return "SUPER_ADMIN";
     }
@@ -59,10 +63,6 @@ export const getRouteOwner = (pathname : string) : "SUPER_ADMIN" | "ADMIN" | "DO
     
     if(isRouteMatches(pathname, patientProtectedRoutes)) {
         return "PATIENT";
-    }
-
-    if(isRouteMatches(pathname, commonProtectedRoutes)) {
-        return "COMMON";
     }
 
     return null; // public route

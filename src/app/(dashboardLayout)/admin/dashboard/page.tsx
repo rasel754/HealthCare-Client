@@ -1,27 +1,63 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { getMeService } from "@/src/services/auth.services";
 import { getDashboardStatsService } from "@/src/services/stats.services";
 import { getAllAppointmentsService } from "@/src/services/appointment.services";
 import { IDashboardStats, IAppointment } from "@/src/types/domain.types";
+import { Role } from "@/src/types/auth.type";
+import { getDefaultDashboardRoute, UserRole } from "@/src/lib/authUtils";
 import { Button } from "@/src/components/ui/button";
 import { AppointmentCharts } from "@/src/components/modules/dashboard/AppointmentCharts";
+import MedicalLoader from "@/src/components/shared/MedicalLoader";
 import { Stethoscope, Users, Calendar, DollarSign, Activity, PlusCircle, ShieldCheck, Clock, Layers } from "lucide-react";
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+
+  const { data: userResponse, isLoading: isUserLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => getMeService(),
+  });
+
+  const user = userResponse && "data" in userResponse ? userResponse.data : null;
+  const isAdmin = Boolean(user && (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN));
+
+  useEffect(() => {
+    if (user && user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN) {
+      router.replace(getDefaultDashboardRoute(user.role as UserRole));
+    }
+  }, [user, router]);
+
   const { data: statsResponse } = useQuery({
     queryKey: ["stats"],
     queryFn: () => getDashboardStatsService(),
+    enabled: isAdmin,
   });
 
   const { data: appointmentsResponse, isLoading: isAppointmentsLoading } = useQuery({
     queryKey: ["admin-all-appointments"],
     queryFn: () => getAllAppointmentsService(),
+    enabled: isAdmin,
   });
 
   const stats = (statsResponse && "data" in statsResponse ? statsResponse.data : {}) as IDashboardStats;
   const appointments = (appointmentsResponse && "data" in appointmentsResponse ? appointmentsResponse.data : []) as IAppointment[];
+
+  if (isUserLoading || (user && user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN)) {
+    return (
+      <MedicalLoader
+        variant="fullscreen"
+        title={user && user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN ? "Redirecting to Dashboard..." : "Loading Admin Control Center..."}
+        subtitle={user && user.role !== Role.ADMIN && user.role !== Role.SUPER_ADMIN ? `Switching to ${user.role} workspace` : "Loading system analytics & medical records"}
+        icon="shield"
+        showECG={true}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

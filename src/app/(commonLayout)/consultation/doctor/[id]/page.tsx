@@ -12,6 +12,7 @@ import {
 } from "@/src/services/appointment.services";
 import { IDoctor, IDoctorSchedule } from "@/src/types/domain.types";
 import { Button } from "@/src/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import {
   Stethoscope,
   Calendar,
@@ -26,6 +27,7 @@ import {
   AlertCircle,
   DollarSign,
   ArrowRight,
+  Star,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -207,7 +209,11 @@ export default function ConsultationDoctorByIdPage({
     );
   }
 
-  const specialtiesList = doctor.doctorSpecialties || [];
+  const rawSpecialties = (doctor.specialties || doctor.doctorSpecialties || []) as any[];
+  const specialtiesList = rawSpecialties.map((ds) => ({
+    id: ds.specialtyId || ds.specialtiesId || ds.specialty?.id || ds.id || String(ds),
+    title: ds.specialty?.title || ds.specialties?.title || (typeof ds === "string" ? ds : ds.title) || "Specialty",
+  }));
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -228,25 +234,29 @@ export default function ConsultationDoctorByIdPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Doctor Full Profile & Schedule Selection (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Doctor Full Profile Card */}
+          {/* Doctor Profile Header Card */}
           <div className="bg-card text-card-foreground rounded-3xl border border-border p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-border">
-              <div className="h-28 w-28 rounded-3xl bg-primary/10 text-primary flex items-center justify-center font-extrabold text-4xl shrink-0 overflow-hidden shadow-sm border-2 border-primary/20">
-                {doctor.profilePhoto ? (
-                  <img src={doctor.profilePhoto} alt={doctor.name} className="h-full w-full object-cover" />
-                ) : (
-                  doctor.name[0]
-                )}
-              </div>
-              <div className="space-y-1.5 flex-1">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{doctor.name}</h1>
-                  <ShieldCheck className="h-5 w-5 text-emerald-500 shrink-0" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <Avatar className="h-24 w-24 rounded-2xl border-2 border-primary/20 shadow-md">
+                <AvatarImage src={doctor.profilePhoto || undefined} alt={doctor.name} className="object-cover" />
+                <AvatarFallback className="rounded-2xl bg-primary/10 text-primary text-2xl font-bold">
+                  {doctor.name ? doctor.name[0] : "D"}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl font-extrabold text-foreground tracking-tight">{doctor.name}</h1>
+                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    Verified Doctor
+                  </span>
                 </div>
-                <p className="text-sm font-bold text-primary">{doctor.designation}</p>
-                <p className="text-xs text-muted-foreground font-medium">{doctor.qualification}</p>
-                <div className="flex flex-wrap items-center gap-3 text-xs pt-1">
-                  <span className="font-bold text-amber-500">★ {doctor.averageRating ? doctor.averageRating.toFixed(1) : "5.0"} Rating</span>
+                <p className="text-sm font-semibold text-primary">{doctor.designation} • {doctor.qualification}</p>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
+                  <div className="flex items-center gap-1 text-amber-500 font-bold">
+                    <Star className="h-4 w-4 fill-amber-500" />
+                    <span>{doctor.averageRating ? doctor.averageRating.toFixed(1) : "5.0"}</span>
+                  </div>
                   <span className="text-muted-foreground">•</span>
                   <span className="text-muted-foreground font-medium">{doctor.experience || 0} Years Experience</span>
                 </div>
@@ -287,12 +297,12 @@ export default function ConsultationDoctorByIdPage({
                 <p className="text-xs text-muted-foreground italic">General Medicine & Consultations</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {specialtiesList.map((ds) => (
+                  {specialtiesList.map((spec, idx) => (
                     <span
-                      key={ds.specialtiesId}
+                      key={`${spec.id}-${idx}`}
                       className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-xl border border-primary/20"
                     >
-                      {ds.specialties?.title || "Specialty"}
+                      {spec.title}
                     </span>
                   ))}
                 </div>

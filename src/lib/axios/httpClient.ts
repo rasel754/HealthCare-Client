@@ -38,51 +38,75 @@ async function tryRefreshToken(
     }
 }
 
-const axiosInstance = async () => {
+export interface ApiRequestOptions {
+    params?: Record<string, unknown>;
+    headers?: Record<string, string>;
+    skipAuth?: boolean;
+}
+
+const axiosInstance = async (options?: ApiRequestOptions) => {
     let cookieHeader = "";
-    try {
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get("accessToken")?.value;
-        const refreshToken = cookieStore.get("refreshToken")?.value;
-        const sessionToken =
-            cookieStore.get("better-auth.session_token")?.value ||
-            cookieStore.get("better-auth-session")?.value ||
-            cookieStore.get("better-auth-session-token")?.value;
+    let accessTokenValue = "";
+    let sessionTokenValue = "";
+    
+    if (!options?.skipAuth) {
+        try {
+            const cookieStore = await cookies();
+            const accessToken = cookieStore.get("accessToken")?.value;
+            const refreshToken = cookieStore.get("refreshToken")?.value;
+            const sessionToken =
+                cookieStore.get("better-auth.session_token")?.value ||
+                cookieStore.get("better-auth-session")?.value ||
+                cookieStore.get("better-auth-session-token")?.value;
 
-        if (accessToken && refreshToken) {
-            await tryRefreshToken(accessToken, refreshToken, sessionToken);
-        } else if (!accessToken && refreshToken) {
-            try {
-                await getNewTokensWithRefreshToken(refreshToken, sessionToken);
-            } catch (err) {
-                console.error("Failed to get new tokens with refresh token:", err);
+            accessTokenValue = accessToken || "";
+            sessionTokenValue = sessionToken || "";
+
+            if (accessToken && refreshToken) {
+                await tryRefreshToken(accessToken, refreshToken, sessionToken);
+            } else if (!accessToken && refreshToken) {
+                try {
+                    await getNewTokensWithRefreshToken(refreshToken, sessionToken);
+                } catch (err) {
+                    console.error("Failed to get new tokens with refresh token:", err);
+                }
             }
+
+            const cookieList = cookieStore.getAll();
+            cookieHeader = cookieList
+                .map((cookie) => `${cookie.name}=${cookie.value}`)
+                .join("; ");
+            
+            // Ensure better-auth session cookie is present in cookieHeader if sessionToken exists
+            if (sessionTokenValue && !cookieHeader.includes("better-auth.session_token")) {
+                cookieHeader = cookieHeader ? `${cookieHeader}; better-auth.session_token=${sessionTokenValue}` : `better-auth.session_token=${sessionTokenValue}`;
+            }
+        } catch {
+            // ignore when cookies() is unavailable during SSG build
         }
+    }
 
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(cookieHeader ? { Cookie: cookieHeader } : {}),
+        ...options?.headers,
+    };
 
-        cookieHeader = cookieStore
-                                    .getAll()
-                                    .map((cookie) => `${cookie.name}=${cookie.value}`)
-                                    .join("; ");    
-    } catch {
-        // ignore when cookies() is unavailable during SSG build
+    if (accessTokenValue && !options?.skipAuth && !headers['Authorization']) {
+        headers['Authorization'] = `Bearer ${accessTokenValue}`;
+    }
+
+    if (sessionTokenValue && !options?.skipAuth && !headers['x-session-token']) {
+        headers['x-session-token'] = sessionTokenValue;
     }
 
     const instance = axios.create({
         baseURL : API_BASE_URL,
         timeout : 30000,
-        headers:{
-            'Content-Type' : 'application/json',
-            Cookie : cookieHeader
-        }
-    })
+        headers,
+    });
 
     return instance;
-}
-
-export interface ApiRequestOptions {
-    params?: Record<string, unknown>;
-    headers?: Record<string, string>;
 }
 
 const logHttpError = (method: string, endpoint: string, error: any) => {
@@ -97,7 +121,7 @@ const logHttpError = (method: string, endpoint: string, error: any) => {
 
 const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
     try {     
-        const instance = await axiosInstance();   
+        const instance = await axiosInstance(options);   
         const response = await instance.get<ApiResponse<TData>>(endpoint, {
             params: options?.params,
             headers: options?.headers,
@@ -111,7 +135,7 @@ const httpGet = async <TData>(endpoint: string, options?: ApiRequestOptions) : P
 
 const httpPost = async <TData>(endpoint: string, data: unknown, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
     try {
-        const instance = await axiosInstance();
+        const instance = await axiosInstance(options);
         const response = await instance.post<ApiResponse<TData>>(endpoint, data, {
             params: options?.params,
             headers: options?.headers,
@@ -125,7 +149,7 @@ const httpPost = async <TData>(endpoint: string, data: unknown, options?: ApiReq
 
 const httpPut = async <TData>(endpoint: string, data: unknown, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
     try {
-        const instance = await axiosInstance();
+        const instance = await axiosInstance(options);
         const response = await instance.put<ApiResponse<TData>>(endpoint, data, {
             params: options?.params,
             headers: options?.headers,
@@ -139,7 +163,7 @@ const httpPut = async <TData>(endpoint: string, data: unknown, options?: ApiRequ
 
 const httpPatch = async <TData>(endpoint: string, data: unknown, options?: ApiRequestOptions) : Promise<ApiResponse<TData>> => {
     try {
-        const instance = await axiosInstance();
+        const instance = await axiosInstance(options);
         const response = await instance.patch<ApiResponse<TData>>(endpoint, data, {
             params: options?.params,
             headers: options?.headers,
@@ -154,7 +178,7 @@ const httpPatch = async <TData>(endpoint: string, data: unknown, options?: ApiRe
 
 const httpDelete = async <TData>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
   try {
-    const instance = await axiosInstance();
+    const instance = await axiosInstance(options);
     const response = await instance.delete<ApiResponse<TData>>(endpoint, {
       params: options?.params,
       headers: options?.headers,
@@ -168,7 +192,7 @@ const httpDelete = async <TData>(endpoint: string, options?: ApiRequestOptions):
 
 const httpPostForm = async <TData>(endpoint: string, data: FormData, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
   try {
-    const instance = await axiosInstance();
+    const instance = await axiosInstance(options);
     const response = await instance.post<ApiResponse<TData>>(endpoint, data, {
       params: options?.params,
       headers: {
@@ -185,7 +209,7 @@ const httpPostForm = async <TData>(endpoint: string, data: FormData, options?: A
 
 const httpPatchForm = async <TData>(endpoint: string, data: FormData, options?: ApiRequestOptions): Promise<ApiResponse<TData>> => {
   try {
-    const instance = await axiosInstance();
+    const instance = await axiosInstance(options);
     const response = await instance.patch<ApiResponse<TData>>(endpoint, data, {
       params: options?.params,
       headers: {

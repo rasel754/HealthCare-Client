@@ -1,30 +1,30 @@
 import { z } from "zod";
 
 export const loginZodSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(1, "Password is required").min(6, "Password must be at least 6 characters long"),
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
+    password: z.string().min(1, "Password is required"),
 });
 
 export const registerZodSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Invalid email address"),
+    name: z.string().trim().min(2, "Name must be at least 2 characters"),
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
-    contactNumber: z.string().min(6, "Contact number is required"),
-    address: z.string().optional(),
+    contactNumber: z.string().trim().min(6, "Contact number is required"),
+    address: z.string().trim().optional(),
 });
 
 export const verifyEmailZodSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    otp: z.string().min(4, "OTP must be at least 4 digits"),
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
+    otp: z.string().trim().min(4, "OTP must be at least 4 digits"),
 });
 
 export const forgetPasswordZodSchema = z.object({
-    email: z.string().email("Invalid email address"),
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
 });
 
 export const resetPasswordZodSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    otp: z.string().min(4, "OTP is required"),
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
+    otp: z.string().trim().min(4, "OTP is required"),
     newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
 

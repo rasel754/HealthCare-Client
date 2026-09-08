@@ -242,11 +242,11 @@ export const AppointmentCharts: React.FC<AppointmentChartsProps> = ({
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      borderColor: "hsl(var(--border))",
+                      backgroundColor: "var(--card)",
+                      borderColor: "var(--border)",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                      color: "hsl(var(--foreground))",
+                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)",
+                      color: "var(--foreground)",
                       fontSize: "12px",
                       fontWeight: 600,
                     }}
@@ -307,11 +307,11 @@ export const AppointmentCharts: React.FC<AppointmentChartsProps> = ({
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      borderColor: "hsl(var(--border))",
+                      backgroundColor: "var(--card)",
+                      borderColor: "var(--border)",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                      color: "hsl(var(--foreground))",
+                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)",
+                      color: "var(--foreground)",
                       fontSize: "12px",
                       fontWeight: 600,
                     }}

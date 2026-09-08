@@ -22,7 +22,7 @@ if(!BASE_API_URL){
 
 export const loginService = async (payload: ILoginPayload): Promise<ILoginResponse | ApiErrorResponse> => {
   try {
-    const response = await httpClient.post<ILoginResponse>("/auth/login", payload);
+    const response = await httpClient.post<ILoginResponse>("/auth/login", payload, { skipAuth: true });
     if (response?.data) {
       const { accessToken, refreshToken, token } = response.data;
       if (accessToken) await setTokenInCookies("accessToken", accessToken);
@@ -44,7 +44,7 @@ export const loginService = async (payload: ILoginPayload): Promise<ILoginRespon
 
 export const registerPatientService = async (payload: IRegisterPayload): Promise<ApiResponse<IRegisterResponse> | ApiErrorResponse> => {
   try {
-    return await httpClient.post<IRegisterResponse>("/auth/register", payload);
+    return await httpClient.post<IRegisterResponse>("/auth/register", payload, { skipAuth: true });
   } catch (error: any) {
     if (error?.code === "ECONNREFUSED") {
       return { success: false, message: "Unable to connect to backend server. Please make sure the server is running on port 5000." };
@@ -68,7 +68,10 @@ export const getMeService = async (): Promise<ApiResponse<IUser> | ApiErrorRespo
       const cookieStore = await cookies();
       accessToken = cookieStore.get("accessToken")?.value;
       refreshToken = cookieStore.get("refreshToken")?.value;
-      sessionToken = cookieStore.get("better-auth.session_token")?.value;
+      sessionToken =
+        cookieStore.get("better-auth.session_token")?.value ||
+        cookieStore.get("better-auth-session")?.value ||
+        cookieStore.get("better-auth-session-token")?.value;
     } catch {
       // cookies unavailable during build
     }
@@ -77,7 +80,7 @@ export const getMeService = async (): Promise<ApiResponse<IUser> | ApiErrorRespo
     }
     if (!accessToken && refreshToken) {
       try {
-        await getNewTokensWithRefreshToken(refreshToken);
+        await getNewTokensWithRefreshToken(refreshToken, sessionToken);
       } catch (err) {
         console.error("Error refreshing token in getMeService:", err);
       }
@@ -106,7 +109,7 @@ export const logoutService = async (): Promise<ApiResponse<null> | ApiErrorRespo
 
 export const verifyEmailService = async (payload: IVerifyEmailPayload): Promise<ApiResponse<null> | ApiErrorResponse> => {
   try {
-    return await httpClient.post<null>("/auth/verify-email", payload);
+    return await httpClient.post<null>("/auth/verify-email", payload, { skipAuth: true });
   } catch (error: any) {
     const message = error?.response?.data?.message || error?.message || "Email verification failed";
     return { success: false, message, error: error?.response?.data };
@@ -115,7 +118,7 @@ export const verifyEmailService = async (payload: IVerifyEmailPayload): Promise<
 
 export const forgetPasswordService = async (payload: IForgetPasswordPayload): Promise<ApiResponse<null> | ApiErrorResponse> => {
   try {
-    return await httpClient.post<null>("/auth/forget-password", payload);
+    return await httpClient.post<null>("/auth/forget-password", payload, { skipAuth: true });
   } catch (error: any) {
     const message = error?.response?.data?.message || error?.message || "Forget password request failed";
     return { success: false, message, error: error?.response?.data };
@@ -124,7 +127,7 @@ export const forgetPasswordService = async (payload: IForgetPasswordPayload): Pr
 
 export const resetPasswordService = async (payload: IResetPasswordPayload): Promise<ApiResponse<null> | ApiErrorResponse> => {
   try {
-    return await httpClient.post<null>("/auth/reset-password", payload);
+    return await httpClient.post<null>("/auth/reset-password", payload, { skipAuth: true });
   } catch (error: any) {
     const message = error?.response?.data?.message || error?.message || "Password reset failed";
     return { success: false, message, error: error?.response?.data };

@@ -1,23 +1,47 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { getMeService } from "@/src/services/auth.services";
 import { getDashboardStatsService } from "@/src/services/stats.services";
 import { getMyAppointmentsService } from "@/src/services/appointment.services";
 import { IDashboardStats, IAppointment } from "@/src/types/domain.types";
+import { Role } from "@/src/types/auth.type";
+import { getDefaultDashboardRoute, UserRole } from "@/src/lib/authUtils";
 import { Button } from "@/src/components/ui/button";
 import { AppointmentCharts } from "@/src/components/modules/dashboard/AppointmentCharts";
+import MedicalLoader from "@/src/components/shared/MedicalLoader";
 import { Calendar, Users, Star, DollarSign, Clock, ArrowRight, Video, FileText } from "lucide-react";
 
 export default function DoctorDashboardPage() {
+  const router = useRouter();
+
+  const { data: userResponse, isLoading: isUserLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => getMeService(),
+  });
+
+  const user = userResponse && "data" in userResponse ? userResponse.data : null;
+  const isDoctor = Boolean(user && user.role === Role.DOCTOR);
+
+  useEffect(() => {
+    if (user && user.role !== Role.DOCTOR) {
+      router.replace(getDefaultDashboardRoute(user.role as UserRole));
+    }
+  }, [user, router]);
+
   const { data: statsResponse } = useQuery({
     queryKey: ["stats"],
     queryFn: () => getDashboardStatsService(),
+    enabled: isDoctor,
   });
 
   const { data: appointmentsResponse, isLoading: isAppointmentsLoading } = useQuery({
     queryKey: ["doctor-all-appointments"],
     queryFn: () => getMyAppointmentsService(),
+    enabled: isDoctor,
   });
 
   const stats = (statsResponse && "data" in statsResponse ? statsResponse.data : {}) as IDashboardStats;
@@ -25,21 +49,33 @@ export default function DoctorDashboardPage() {
 
   const upcomingConsultations = appointments.slice(0, 5);
 
+  if (isUserLoading || (user && user.role !== Role.DOCTOR)) {
+    return (
+      <MedicalLoader
+        variant="fullscreen"
+        title={user && user.role !== Role.DOCTOR ? "Redirecting to Dashboard..." : "Loading Doctor Portal..."}
+        subtitle={user && user.role !== Role.DOCTOR ? `Switching to ${user.role} workspace` : "Loading your clinical schedule & appointments"}
+        icon="stethoscope"
+        showECG={true}
+      />
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-primary to-primary/90 rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl border border-border/30">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary-foreground text-xs font-bold uppercase">
             Doctor Portal
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Clinical Dashboard</h2>
-          <p className="text-sm text-primary-foreground/80 max-w-lg">
+          <p className="text-sm text-slate-300 max-w-lg">
             Manage your patient appointments, assign consultation schedule slots, and issue digital prescriptions.
           </p>
         </div>
         <Link href="/doctor/dashboard/my-schedules">
-          <Button size="lg" variant="secondary" className="rounded-xl font-bold gap-2">
+          <Button size="lg" className="rounded-xl font-bold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg">
             <Clock className="h-5 w-5" /> Manage Available Slots
           </Button>
         </Link>

@@ -49,7 +49,11 @@ export default function DoctorSpecialtiesManagementPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {doctors.map((doc) => {
-            const specialtiesList = doc.doctorSpecialties || [];
+            const rawSpecialties = (doc.specialties || doc.doctorSpecialties || []) as any[];
+            const specialtiesList = rawSpecialties.map((ds) => ({
+              id: ds.specialtyId || ds.specialtiesId || ds.specialty?.id || ds.id || String(ds),
+              title: ds.specialty?.title || ds.specialties?.title || (typeof ds === "string" ? ds : ds.title) || "Specialty",
+            }));
 
             return (
               <div key={doc.id} className="bg-card text-card-foreground rounded-3xl border border-border p-6 space-y-4 shadow-xs">
@@ -71,12 +75,12 @@ export default function DoctorSpecialtiesManagementPage() {
                     <p className="text-xs text-muted-foreground italic">No specialties assigned.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {specialtiesList.map((ds) => (
+                      {specialtiesList.map((spec, idx) => (
                         <span
-                          key={ds.specialtiesId}
+                          key={`${spec.id}-${idx}`}
                           className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full border border-primary/20"
                         >
-                          {ds.specialties?.title || "Specialty"}
+                          {spec.title}
                         </span>
                       ))}
                     </div>

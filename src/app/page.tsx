@@ -1,8 +1,22 @@
 import Link from "next/link";
 import Navbar from "@/src/components/shared/Navbar";
 import Footer from "@/src/components/shared/Footer";
+import HeroAuthButtons from "@/src/components/modules/home/HeroAuthButtons";
+import FeaturedDoctorsSection from "@/src/components/modules/home/FeaturedDoctorsSection";
+import HealthPlansSection from "@/src/components/modules/home/HealthPlansSection";
+import PartnerNGOsSection from "@/src/components/modules/home/PartnerNGOsSection";
 import { Button } from "@/src/components/ui/button";
-import { Activity, Calendar, ShieldCheck, Stethoscope, Clock, Award, ArrowRight, HeartPulse, Video } from "lucide-react";
+import {
+  Calendar,
+  ShieldCheck,
+  Stethoscope,
+  Clock,
+  HeartPulse,
+  Video,
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -47,18 +61,7 @@ export default function Home() {
               <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 Find top-rated specialist doctors, schedule real-time appointment slots, pay securely via Stripe, and receive instant digital prescriptions.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                <Link href="/consultation">
-                  <Button size="lg" className="w-full sm:w-auto rounded-xl px-8 h-12 text-base gap-2 shadow-lg shadow-primary/20">
-                    Find a Doctor Now <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl px-8 h-12 text-base shadow-xs">
-                    Patient Registration
-                  </Button>
-                </Link>
-              </div>
+              <HeroAuthButtons />
 
               <div className="pt-8 grid grid-cols-3 gap-4 border-t border-border max-w-lg mx-auto lg:mx-0">
                 <div>
@@ -117,7 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Core Platform Features Grid */}
       <section className="py-16 lg:py-24 bg-muted/20 border-t border-border">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
@@ -142,6 +145,42 @@ export default function Home() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Modular Section 1: Featured Doctors */}
+      <FeaturedDoctorsSection />
+
+      {/* Modular Section 2: Health Plans */}
+      <HealthPlansSection />
+
+      {/* Modular Section 3: Partner NGOs */}
+      <PartnerNGOsSection />
+
+      {/* Final Call to Action Section */}
+      <section className="py-20 bg-gradient-to-r from-primary/15 via-primary/5 to-indigo-500/15 border-t border-border">
+        <div className="container max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="h-4 w-4" /> Start Your Wellness Journey Today
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">
+            Ready to Experience Better Healthcare?
+          </h2>
+          <p className="text-muted-foreground text-base max-w-2xl mx-auto leading-relaxed">
+            Join thousands of patients receiving world-class medical advice, diagnostics, and ongoing support from licensed professionals.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <Link href="/consultation">
+              <Button size="lg" className="rounded-xl px-8 h-12 text-base gap-2 font-semibold shadow-lg shadow-primary/20">
+                Book a Consultation Now <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/health-plans">
+              <Button size="lg" variant="outline" className="rounded-xl px-8 h-12 text-base font-semibold shadow-xs">
+                View Health Plans
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -329,11 +329,8 @@ function DoctorsManagementContent() {
     setEditPhotoFile(null);
     setEditPhotoPreview(doc.profilePhoto || null);
 
-    const initialSpecialtyIds =
-      doc.specialties?.map((s: any) => (typeof s === "string" ? s : s.id || s.specialtyId || s.specialty?.id)).filter(Boolean) ||
-      doc.doctorSpecialties?.map((ds: any) => ds.specialtiesId || ds.specialties?.id).filter(Boolean) ||
-      [];
-    setEditSpecialtyIds(initialSpecialtyIds as string[]);
+    const initialSpecialtyIds = getDoctorSpecialties(doc).map((s) => s.id);
+    setEditSpecialtyIds(initialSpecialtyIds);
   };
 
   const toggleEditSpecialtySelect = (id: string) => {
@@ -360,11 +357,8 @@ function DoctorsManagementContent() {
       appointmentFee: Number(editFee),
       experience: Number(editExp),
       gender: editGender,
+      specialties: editSpecialtyIds,
     };
-
-    if (editSpecialtyIds.length > 0) {
-      dataPayload.specialties = editSpecialtyIds;
-    }
 
     if (editPhotoFile) {
       const formData = new FormData();
